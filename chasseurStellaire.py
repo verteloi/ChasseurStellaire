@@ -12,6 +12,7 @@ class Controleur:
         self.modele.mise_a_jour()
         self.vue.afficher_jeu()
         self.vue.root.after(30, self.boucle_jeu)
+        print(self.modele.compteur)
 
     # Méthodes appelées par la Vue (via bindings)
     def deplacer_vaisseau(self, x):
@@ -19,6 +20,10 @@ class Controleur:
 
     def tirer(self):
         self.modele.tirer()
+        self.modele.shooting = True
+
+    def release(self):
+        self.modele.shooting = False
 
     def rejouer(self):
         self.modele = Modele(self,600,800)

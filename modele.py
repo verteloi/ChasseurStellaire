@@ -21,19 +21,45 @@ class Projectile:
 
 
 class Vaisseau:
-    def __init__(self, x, y):
+    def __init__(self, x, y, modele):
         self.x = x
         self.y = y
         self.vie = 3
         self.projectiles = []
         self.taille_x = 15
         self.taille_y = 15
+        self.modele = modele  
 
     def deplacer(self, x):
         self.x = x
     def tirer(self):
-        nouveau_proj = Projectile(self.x, self.y - 20)
-        self.projectiles.append(nouveau_proj)
+        match self.modele.niveau :
+            case 1:
+                nouveau_proj = Projectile(self.x, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 2:
+                nouveau_proj = Projectile(self.x, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 3:
+                nouveau_proj = Projectile(self.x, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x - 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x + 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 4:
+                self.taille_x = 4
+                nouveau_proj = Projectile(self.x - 10, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x + 10, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x - 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x + 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 5:
+                self.niveau = 5
+
 
     def mise_a_jour(self):
         for p in self.projectiles:
@@ -77,11 +103,14 @@ class Modele:
         self.parent = parent
         self.largeur = 600
         self.hauteur = 700
-        self.vaisseau = Vaisseau(self.largeur // 2, self.hauteur - 50)
+        self.vaisseau = Vaisseau(self.largeur // 2, self.hauteur - 50, self)
         self.ovnis = []
         self.asteroides = []
         self.score = 0
         self.niveau = 1
+        self.compteur = 0
+        self.shooting = False
+
 
     #Collision tire/ovni:
     def collisionProjectile(self):
@@ -108,9 +137,17 @@ class Modele:
         self.collisionProjectile()
         self.levelUp()
 
+        if self.niveau >= 2:
+            if self.shooting:
+                if self.compteur >= 4:   # 7 frames ~ cooldown
+                    self.vaisseau.tirer()
+                    self.compteur = 0
+
+
+
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
-        if alea_ovni < 0.02:
+        if alea_ovni < 0.10:
             nouvel_ovni = OVNI(
                 random.randint(0, self.largeur),
                 0,
@@ -145,6 +182,8 @@ class Modele:
             a for a in self.asteroides
             if a.y < self.hauteur
         ]
+
+        self.compteur += 1
 
     def levelUp(self):
         match self.score :
