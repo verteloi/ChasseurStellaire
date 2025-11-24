@@ -1,6 +1,12 @@
 import random
 
 # ------------------ CLASSES ------------------
+prochain_id = 0
+
+def createur_identifiant():
+    global prochain_id
+    prochain_id += 1
+    return "id_"+str(prochain_id)
 
 class Projectile:
     def __init__(self, x, y):
@@ -40,12 +46,13 @@ class Vaisseau:
 
 
 class OVNI:
-    def __init__(self, x, y, vy):
+    def __init__(self, x, y, vy, id):
         self.x = x
         self.y = y
         self.vy = vy
         self.taille_x = 12
         self.taille_y = 6
+        self.id = id 
 
     def mise_a_jour(self):
         self.y += self.vy
@@ -76,6 +83,22 @@ class Modele:
         self.score = 0
         self.niveau = 1
 
+    #Collision tire/ovni:
+    def collisionProjectile(self):
+        for o in list(self.ovnis):
+            for p in list(self.vaisseau.projectiles):
+                if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
+                    self.supprimerOvni(o.id)
+                    self.vaisseau.projectiles.remove(p)
+                    break
+
+    def supprimerOvni(self, id):
+        for o in self.ovnis:
+            if o.id == id:
+                self.ovnis.remove(o)
+                self.score += 1
+                break
+
     def deplacer_vaisseau(self,x):
         self.vaisseau.deplacer(x)
     def tirer(self):
@@ -89,7 +112,8 @@ class Modele:
             nouvel_ovni = OVNI(
                 random.randint(0, self.largeur),
                 0,
-                random.randint(2, 5)
+                random.randint(2, 5),
+                createur_identifiant()
             )
             self.ovnis.append(nouvel_ovni)
 
@@ -108,6 +132,9 @@ class Modele:
 
         for a in self.asteroides:
             a.mise_a_jour()
+
+        # Vérifier collisions
+        self.collisionProjectile()
 
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
