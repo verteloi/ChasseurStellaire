@@ -105,6 +105,8 @@ class Modele:
         self.vaisseau.tirer()
     def mise_a_jour(self):
         self.vaisseau.mise_a_jour()
+        self.collisionProjectile()
+        self.levelUp()
 
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
@@ -133,9 +135,6 @@ class Modele:
         for a in self.asteroides:
             a.mise_a_jour()
 
-        # Vérifier collisions
-        self.collisionProjectile()
-
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
             o for o in self.ovnis
@@ -146,3 +145,14 @@ class Modele:
             a for a in self.asteroides
             if a.y < self.hauteur
         ]
+
+    def levelUp(self):
+        match self.score :
+            case 10:
+                self.niveau = 2
+            case 25:
+                self.niveau = 3
+            case 50:
+                self.niveau = 4
+            case 100:
+                self.niveau = 5
