@@ -109,6 +109,16 @@ class Vue:
                 fill="gray"
             )
 
+        # --- Powerups ---
+        for p in modele.powerups:
+            self.canevas.create_rectangle(
+                p.x - p.taille_x,
+                p.y - p.taille_y,
+                p.x + p.taille_x,
+                p.y + p.taille_y,
+                fill="purple"
+            )
+
         # --- Infos ---
         self.label_vie.config(text=f"Vies : {v.vie}")
         self.label_niveau.config(text=f"Niveau : {modele.niveau}")

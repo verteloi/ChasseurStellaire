@@ -19,6 +19,18 @@ class Projectile:
     def mise_a_jour(self):
         self.y += self.vitesse
 
+class Powerup:
+    def __init__(self, x, y, vitesse, id, type):
+        self.x = x
+        self.y = y
+        self.vitesse = 5
+        self.taille_x = 10
+        self.taille_y = 10
+        self.type = ["vie", "shield"]
+
+    def mise_a_jour(self):
+        self.y += self.vitesse
+
 
 class Vaisseau:
     def __init__(self, x, y):
@@ -64,7 +76,7 @@ class Asteroide:
         self.x = x
         self.y = y
         self.vy = vy
-        self.size = random.randint(10, 25)
+        self.size = random.randint(10, 50)
         self.taille_x = self.size
         self.taille_y = self.size
         self.degat = 1
@@ -84,8 +96,11 @@ class Modele:
         self.vaisseau = Vaisseau(self.largeur // 2, self.hauteur - 50)
         self.ovnis = []
         self.asteroides = []
+        self.powerups = []
         self.score = 0
         self.niveau = 1
+        self.ovniSpawnrate = 0.2
+        self.asteroidesSpawnrate = 0.1
 
     #Collision ovni/vaisseau
     def collisionOvniVaisseau(self):
@@ -115,6 +130,11 @@ class Modele:
                     self.supprimerOvni(o.id)
                     self.vaisseau.projectiles.remove(p)
                     self.score += 1
+
+                    alea_power = random.random()
+                    if alea_power < 1:
+                        nouveau_power = Powerup(o.x,o.y, 10, createur_identifiant(), "vie")
+                        self.powerups.append(nouveau_power)
                     break
 
     # verifier tous les collisions
@@ -172,6 +192,9 @@ class Modele:
         for a in self.asteroides:
             a.mise_a_jour()
 
+        for p in self.powerups:
+            p.mise_a_jour()
+
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
             o for o in self.ovnis
@@ -182,6 +205,11 @@ class Modele:
             a for a in self.asteroides
             if a.y < self.hauteur
         ]
+
+        # self.powerups = [
+        #     p for p in self.powerups
+        #     if a.y < self.hauteur
+        # ]
 
     def levelUp(self):
         match self.score :
