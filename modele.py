@@ -53,6 +53,7 @@ class OVNI:
         self.taille_x = 12
         self.taille_y = 6
         self.id = id 
+        self.degat = 1
 
     def mise_a_jour(self):
         self.y += self.vy
@@ -65,6 +66,7 @@ class Asteroide:
         self.vy = vy
         self.taille_x = 10
         self.taille_y = 10
+        self.degat = 1
 
     def mise_a_jour(self):
         self.y += self.vy
@@ -83,6 +85,16 @@ class Modele:
         self.score = 0
         self.niveau = 1
 
+    #Collision ovni/vaisseau
+    def collisionOvniVaisseau(self):
+        for o in list(self.ovnis):
+            if o.x - o.taille_x <= self.vaisseau.x <= o.x + o.taille_x and o.y - o.taille_y <= self.vaisseau.y <= o.y + o.taille_y:
+                self.supprimerOvni(o.id)
+                self.vaisseau.vie -= o.degat
+                if (self.vaisseau.vie == 0):
+                    self.parent.rejouer()
+                break
+
     #Collision tire/ovni:
     def collisionProjectile(self):
         for o in list(self.ovnis):
@@ -90,13 +102,13 @@ class Modele:
                 if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
                     self.supprimerOvni(o.id)
                     self.vaisseau.projectiles.remove(p)
+                    self.score += 1
                     break
 
     def supprimerOvni(self, id):
         for o in self.ovnis:
             if o.id == id:
                 self.ovnis.remove(o)
-                self.score += 1
                 break
 
     def deplacer_vaisseau(self,x):
@@ -135,6 +147,9 @@ class Modele:
 
         # Vérifier collisions
         self.collisionProjectile()
+
+        # Vérifier collisions
+        self.collisionOvniVaisseau()
 
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
