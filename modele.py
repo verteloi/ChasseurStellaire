@@ -60,13 +60,14 @@ class OVNI:
 
 
 class Asteroide:
-    def __init__(self, x, y, vy):
+    def __init__(self, x, y, vy, id):
         self.x = x
         self.y = y
         self.vy = vy
         self.taille_x = 10
         self.taille_y = 10
         self.degat = 1
+        self.id = id
 
     def mise_a_jour(self):
         self.y += self.vy
@@ -95,6 +96,16 @@ class Modele:
                     self.parent.rejouer()
                 break
 
+    #Collision ovni/asteroide
+    def collisionAsteroideVaisseau(self):
+        for a in list(self.asteroides):
+            if a.x - a.taille_x <= self.vaisseau.x <= a.x + a.taille_x and a.y - a.taille_y <= self.vaisseau.y <= a.y + a.taille_y:
+                self.supprimerAsteroide(a.id)
+                self.vaisseau.vie -= a.degat
+                if (self.vaisseau.vie == 0):
+                    self.parent.rejouer()
+                break
+
     #Collision tire/ovni:
     def collisionProjectile(self):
         for o in list(self.ovnis):
@@ -105,10 +116,22 @@ class Modele:
                     self.score += 1
                     break
 
+    # verifier tous les collisions
+    def verifierToutCollisions(self):
+        self.collisionOvniVaisseau()
+        self.collisionAsteroideVaisseau()
+        self.collisionProjectile()
+
     def supprimerOvni(self, id):
         for o in self.ovnis:
             if o.id == id:
                 self.ovnis.remove(o)
+                break
+
+    def supprimerAsteroide(self, id):
+        for a in self.asteroides:
+            if a.id == id:
+                self.asteroides.remove(a)
                 break
 
     def deplacer_vaisseau(self,x):
@@ -117,6 +140,7 @@ class Modele:
         self.vaisseau.tirer()
     def mise_a_jour(self):
         self.vaisseau.mise_a_jour()
+        self.verifierToutCollisions()
 
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
@@ -134,7 +158,8 @@ class Modele:
             nouvel_ast = Asteroide(
                 random.randint(0, self.largeur),
                 0,
-                random.randint(3, 6)
+                random.randint(3, 6),
+                createur_identifiant()
             )
             self.asteroides.append(nouvel_ast)
 
@@ -144,12 +169,6 @@ class Modele:
 
         for a in self.asteroides:
             a.mise_a_jour()
-
-        # Vérifier collisions
-        self.collisionProjectile()
-
-        # Vérifier collisions
-        self.collisionOvniVaisseau()
 
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
