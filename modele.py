@@ -27,6 +27,7 @@ class Powerup:
         self.taille_x = 10
         self.taille_y = 10
         self.type = ["vie", "shield"]
+        self.id = id
 
     def mise_a_jour(self):
         self.y += self.vitesse
@@ -122,6 +123,14 @@ class Modele:
                     self.parent.rejouer()
                 break
 
+    #Collision ovni/powerup
+    def collisionPowerupVaisseau(self):
+        for p in list(self.powerups):
+            if p.x - p.taille_x <= self.vaisseau.x <= p.x + p.taille_x and p.y - p.taille_y <= self.vaisseau.y <= p.y + p.taille_y:
+                print("collision")
+                self.supprimerPowerup(p.id)
+                break
+
     #Collision tire/ovni:
     def collisionProjectile(self):
         for o in list(self.ovnis):
@@ -142,6 +151,7 @@ class Modele:
         self.collisionOvniVaisseau()
         self.collisionAsteroideVaisseau()
         self.collisionProjectile()
+        self.collisionPowerupVaisseau()
 
     def supprimerOvni(self, id):
         for o in self.ovnis:
@@ -153,6 +163,12 @@ class Modele:
         for a in self.asteroides:
             if a.id == id:
                 self.asteroides.remove(a)
+                break
+
+    def supprimerPowerup(self, id):
+        for p in self.powerups:
+            if p.id == id:
+                self.powerups.remove(p)
                 break
 
     def deplacer_vaisseau(self,x):
