@@ -64,8 +64,9 @@ class Asteroide:
         self.x = x
         self.y = y
         self.vy = vy
-        self.taille_x = 10
-        self.taille_y = 10
+        self.size = random.randint(10, 25)
+        self.taille_x = self.size
+        self.taille_y = self.size
         self.degat = 1
         self.id = id
 
@@ -141,6 +142,7 @@ class Modele:
     def mise_a_jour(self):
         self.vaisseau.mise_a_jour()
         self.verifierToutCollisions()
+        self.levelUp()
 
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
@@ -180,3 +182,14 @@ class Modele:
             a for a in self.asteroides
             if a.y < self.hauteur
         ]
+
+    def levelUp(self):
+        match self.score :
+            case 10:
+                self.niveau = 2
+            case 25:
+                self.niveau = 3
+            case 50:
+                self.niveau = 4
+            case 100:
+                self.niveau = 5
