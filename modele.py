@@ -33,20 +33,59 @@ class Powerup:
         self.y += self.vitesse
 
 
+class Powerup:
+    def __init__(self, x, y, vitesse, id, type):
+        self.x = x
+        self.y = y
+        self.vitesse = 5
+        self.taille_x = 10
+        self.taille_y = 10
+        self.type = ["vie", "shield"]
+        self.id = id
+
+    def mise_a_jour(self):
+        self.y += self.vitesse
+
+
 class Vaisseau:
-    def __init__(self, x, y):
+    def __init__(self, x, y, modele):
         self.x = x
         self.y = y
         self.vie = 3
         self.projectiles = []
         self.taille_x = 15
         self.taille_y = 15
+        self.modele = modele  
 
     def deplacer(self, x):
         self.x = x
     def tirer(self):
-        nouveau_proj = Projectile(self.x, self.y - 20)
-        self.projectiles.append(nouveau_proj)
+        match self.modele.niveau :
+            case 1:
+                nouveau_proj = Projectile(self.x, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 2:
+                nouveau_proj = Projectile(self.x, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 3:
+                nouveau_proj = Projectile(self.x, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x - 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x + 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 4:
+                self.taille_x = 4
+                nouveau_proj = Projectile(self.x - 10, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x + 10, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x - 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+                nouveau_proj = Projectile(self.x + 20, self.y - 20)
+                self.projectiles.append(nouveau_proj)
+            case 5:
+                self.niveau = 5
 
     def mise_a_jour(self):
         for p in self.projectiles:
@@ -94,14 +133,15 @@ class Modele:
         self.parent = parent
         self.largeur = 600
         self.hauteur = 700
-        self.vaisseau = Vaisseau(self.largeur // 2, self.hauteur - 50)
+        self.vaisseau = Vaisseau(self.largeur // 2, self.hauteur - 50, self)
         self.ovnis = []
         self.asteroides = []
         self.powerups = []
         self.score = 0
         self.niveau = 1
-        self.ovniSpawnrate = 0.2
-        self.asteroidesSpawnrate = 0.1
+        self.compteur = 0
+        self.shooting = False
+
 
     #Collision ovni/vaisseau
     def collisionOvniVaisseau(self):
@@ -113,7 +153,7 @@ class Modele:
                     self.parent.rejouer()
                 break
 
-    #Collision ovni/asteroide
+    #Collision asteroide/vaisseau
     def collisionAsteroideVaisseau(self):
         for a in list(self.asteroides):
             if a.x - a.taille_x <= self.vaisseau.x <= a.x + a.taille_x and a.y - a.taille_y <= self.vaisseau.y <= a.y + a.taille_y:
@@ -123,7 +163,7 @@ class Modele:
                     self.parent.rejouer()
                 break
 
-    #Collision ovni/powerup
+    #Collision powerup/vaisseau
     def collisionPowerupVaisseau(self):
         for p in list(self.powerups):
             if p.x - p.taille_x <= self.vaisseau.x <= p.x + p.taille_x and p.y - p.taille_y <= self.vaisseau.y <= p.y + p.taille_y:
@@ -180,9 +220,16 @@ class Modele:
         self.verifierToutCollisions()
         self.levelUp()
 
+        if self.niveau >= 2:
+            if self.shooting:
+                if self.compteur >= 4:   # 7 frames ~ cooldown
+                    self.vaisseau.tirer()
+                    self.compteur = 0
+
+
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
-        if alea_ovni < 0.02:
+        if alea_ovni < 0.10:
             nouvel_ovni = OVNI(
                 random.randint(0, self.largeur),
                 0,
@@ -222,10 +269,12 @@ class Modele:
             if a.y < self.hauteur
         ]
 
-        # self.powerups = [
-        #     p for p in self.powerups
-        #     if a.y < self.hauteur
-        # ]
+        self.powerups = [
+            p for p in self.powerups
+            if p.y < self.hauteur
+        ]
+
+        self.compteur += 1
 
     def levelUp(self):
         match self.score :

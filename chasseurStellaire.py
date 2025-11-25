@@ -19,6 +19,10 @@ class Controleur:
 
     def tirer(self):
         self.modele.tirer()
+        self.modele.shooting = True
+
+    def release(self):
+        self.modele.shooting = False
 
     def rejouer(self):
         self.modele = Modele(self,600,800)
