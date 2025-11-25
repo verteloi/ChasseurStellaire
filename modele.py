@@ -86,7 +86,6 @@ class Asteroide:
     def mise_a_jour(self):
         self.y += self.vy
 
-
 # ------------------ MODÈLE ------------------
 
 class Modele:
@@ -110,7 +109,7 @@ class Modele:
                 self.supprimerOvni(o.id)
                 self.vaisseau.vie -= o.degat
                 if (self.vaisseau.vie == 0):
-                    self.parent.rejouer()
+                    self.parent.gameOver()
                 break
 
     #Collision ovni/asteroide
@@ -119,8 +118,10 @@ class Modele:
             if a.x - a.taille_x <= self.vaisseau.x <= a.x + a.taille_x and a.y - a.taille_y <= self.vaisseau.y <= a.y + a.taille_y:
                 self.supprimerAsteroide(a.id)
                 self.vaisseau.vie -= a.degat
+
                 if (self.vaisseau.vie == 0):
-                    self.parent.rejouer()
+                    self.parent.gameOver()
+
                 break
 
     #Collision ovni/powerup

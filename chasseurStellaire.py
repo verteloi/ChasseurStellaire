@@ -24,5 +24,8 @@ class Controleur:
         self.modele = Modele(self,600,800)
         self.vue.modele = self.modele
 
+    def gameOver(self):
+        self.vue.clear_window()
+
 if __name__ == "__main__":
     c = Controleur()

@@ -41,6 +41,17 @@ class Vue:
         self.btn_rejouer = tk.Button(self.frame_infos, text="Rejouer", command=self.rejouer)
         self.btn_rejouer.pack(pady=10)
 
+        self.btn_enregistrerScore = tk.Button(self.frame_infos, text="Enregistrer Score")
+        self.btn_enregistrerScore.pack(pady=10)
+
+    # ---------- Fin du jeu ---------
+
+    def clear_window(self):
+        self.root.quit()
+        self.canevas.config(bg="white")
+        self.canevas.create_text(200, 300, text="Game Over, pute", font=("Arial", 50), fill="black")
+        self.canevas.update()
+
     # ---------- Affichage du jeu ----------
     def afficher_jeu(self):
         modele = self.modele
