@@ -35,6 +35,9 @@ class Vue:
         self.label_niveau = tk.Label(self.frame_infos, text="Niveau : 1", fg="white", bg="#222", font=("Arial", 12))
         self.label_niveau.pack(pady=10)
 
+        self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", bg="#222", font=("Arial", 12))
+        self.label_score.pack(pady=10)
+
         self.btn_rejouer = tk.Button(self.frame_infos, text="Rejouer", command=self.rejouer)
         self.btn_rejouer.pack(pady=10)
 
@@ -106,9 +109,20 @@ class Vue:
                 fill="gray"
             )
 
+        # --- Powerups ---
+        for p in modele.powerups:
+            self.canevas.create_rectangle(
+                p.x - p.taille_x,
+                p.y - p.taille_y,
+                p.x + p.taille_x,
+                p.y + p.taille_y,
+                fill="purple"
+            )
+
         # --- Infos ---
         self.label_vie.config(text=f"Vies : {v.vie}")
         self.label_niveau.config(text=f"Niveau : {modele.niveau}")
+        self.label_score.config(text=f"Score : {modele.score}")
 
     def deplacer_vaisseau(self,evt):
         # on pourrait vouloir le déplacer en y aussi
