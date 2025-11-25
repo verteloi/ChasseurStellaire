@@ -54,7 +54,7 @@ class Vue:
             v.y - 5,
             v.x + v.taille_x,
             v.y + 5,
-            fill="blue"
+            fill="grey"
         )
         self.canevas.create_oval(
             v.x - (v.taille_x // 2),
@@ -68,8 +68,18 @@ class Vue:
             v.y - v.taille_y,
             v.x,
             v.y - v.taille_y - 5,
-            fill="white",
+            fill="grey",
             width=2
+        )
+
+        if (v.shield == True):
+            self.canevas.create_line(
+                v.x - 10,             
+                v.y - v.taille_y - 10,    
+                v.x + 10,             
+                v.y - v.taille_y - 10,    
+                fill="deepskyblue",
+                width=4
         )
 
         # --- Projectiles ---
@@ -112,13 +122,20 @@ class Vue:
 
         # --- Powerups ---
         for p in modele.powerups:
-            self.canevas.create_rectangle(
+            self.canevas.create_oval(
                 p.x - p.taille_x,
                 p.y - p.taille_y,
                 p.x + p.taille_x,
                 p.y + p.taille_y,
-                fill="purple"
+                fill=p.color
             )
+
+            # self.canevas.create_text(
+            #     p.x, p.y + 10,                # Coordinates of the text's anchor point
+            #         text="+1",    # The string to display
+            #         fill="white",        # Text color
+            #         font=("Arial", 20),  # Font settings
+            # )
 
         # --- Infos ---
         self.label_vie.config(text=f"Vies : {v.vie}")
