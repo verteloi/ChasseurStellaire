@@ -33,20 +33,6 @@ class Powerup:
         self.y += self.vitesse
 
 
-class Powerup:
-    def __init__(self, x, y, vitesse, id, type):
-        self.x = x
-        self.y = y
-        self.vitesse = 5
-        self.taille_x = 10
-        self.taille_y = 10
-        self.type = ["vie", "shield"]
-        self.id = id
-
-    def mise_a_jour(self):
-        self.y += self.vitesse
-
-
 class Vaisseau:
     def __init__(self, x, y, modele):
         self.x = x
