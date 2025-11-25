@@ -120,6 +120,16 @@ class Vue:
                 fill="purple"
             )
 
+        # --- Explosion --
+        for e in modele.explosion:
+            self.canevas.create_oval(
+                e.x - e.taille_x,
+                e.y - e.taille_y,
+                e.x + e.taille_x,
+                e.y + e.taille_y,
+                fill="red"
+            )
+
         # --- Infos ---
         self.label_vie.config(text=f"Vies : {v.vie}")
         self.label_niveau.config(text=f"Niveau : {modele.niveau}")

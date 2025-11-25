@@ -19,6 +19,12 @@ class Projectile:
     def mise_a_jour(self):
         self.y += self.vitesse
 
+class Explosion:
+    def __init__(self ,x, y):
+        self.x = x
+        self.y = y
+        self.taille_x = 20
+        self.taille_y = 20
 
 class Powerup:
     def __init__(self, x, y, vitesse, id, type):
@@ -128,7 +134,10 @@ class Modele:
         self.niveau = 1
         self.compteur = 0
         self.shooting = False
+        self.explosion = []
 
+
+    
 
     #Collision ovni/vaisseau
     def collisionOvniVaisseau(self):
@@ -173,10 +182,22 @@ class Modele:
                         self.powerups.append(nouveau_power)
                     break
 
+
+
+    def ExplosionOvni(self):
+        for o in list(self.ovnis):
+            for p in list(self.vaisseau.projectiles):
+                if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
+                    print("Explosion")
+                    nouvelle_explosion = Explosion(o.x,o.y)
+                    self.explosion.append(nouvelle_explosion)
+                    break
+
     # verifier tous les collisions
     def verifierToutCollisions(self):
         self.collisionOvniVaisseau()
         self.collisionAsteroideVaisseau()
+        self.ExplosionOvni()
         self.collisionProjectile()
         self.collisionPowerupVaisseau()
 
