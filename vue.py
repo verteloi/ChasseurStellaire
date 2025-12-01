@@ -39,8 +39,16 @@ class Vue:
         self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", bg="#222", font=("Arial", 12))
         self.label_score.pack(pady=10)
 
-        self.btn_rejouer = tk.Button(self.frame_infos, text="Rejouer", command=self.rejouer)
-        self.btn_rejouer.pack(pady=10)
+    def clear_window(self):
+        self.canevas.delete("all")
+        self.canevas.config(bg="black")
+
+        self.canevas.create_text(300, 250, text="GAME OVER", font=("Arial", 40, "bold"), fill="red")
+        self.canevas.create_text(300, 320, text=f"Score finale : {self.modele.score} ovnis détruits", font=("Arial", 20), fill="white")
+        self.btn_rejouer = tk.Button(self.root, text="Réessayer?", font=("Arial", 16), command=self.controleur.rejouer)
+        self.canevas.create_window(300, 400, window=self.btn_rejouer)
+        self.btn_enregistrerScore = tk.Button(self.root, text="Enregistrer Score", font=("Arial", 16), command=self.controleur.enregistrerScore)
+        self.canevas.create_window(300, 450, window=self.btn_enregistrerScore)
 
     # ---------- Affichage du jeu ----------
     def afficher_jeu(self):
@@ -99,14 +107,14 @@ class Vue:
                 o.y - o.taille_y,
                 o.x + o.taille_x,
                 o.y + o.taille_y,
-                fill="red"
+                fill=o.couleur
             )
             self.canevas.create_line(
                 o.x,
                 o.y + o.taille_y,
                 o.x,
                 o.y + o.taille_y + 6,
-                fill="orange",
+                fill="grey",
                 width=2
             )
 

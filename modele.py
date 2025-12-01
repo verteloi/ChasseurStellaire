@@ -105,17 +105,43 @@ class Vaisseau:
 
 
 class OVNI:
-    def __init__(self, x, y, vy, id):
+    def __init__(self, x, y, vy, id, vie):
         self.x = x
         self.y = y
         self.vy = vy
         self.taille_x = 12
         self.taille_y = 6
         self.id = id 
+        self.vie = vie
         self.degat = 1
+        self.couleur_ovni()
+
+    def couleur_ovni(self):
+        match self.vie :
+            case 1:
+                self.couleur = "firebrick"
+            case 2:
+                self.couleur = "coral1"
+            case 3:
+                self.couleur = "darkorange"
+            case 4:
+                self.couleur = "chocolate1"
+            case 5:
+                self.couleur = "yellow"
 
     def mise_a_jour(self):
         self.y += self.vy
+        self.couleur_ovni()
+
+    # def changer_vie(self):
+    #     match self.niveauOvni:
+    #         case 1:
+    #             self.vie = 1
+    #         case 2:
+    #             self.vie = 2
+    #         case 3:
+    #             self.vie = 3
+
 
 
 class Asteroide:
@@ -154,14 +180,13 @@ class Modele:
     def collisionOvniVaisseau(self):
         for o in list(self.ovnis):
             if o.x - o.taille_x <= self.vaisseau.x <= o.x + o.taille_x and o.y - o.taille_y <= self.vaisseau.y <= o.y + o.taille_y:
-                print("Touché")
                 self.supprimerOvni(o.id)
                 if (self.vaisseau.shield == True):
                     self.vaisseau.shield = False
                 else:
                     self.vaisseau.vie -= o.degat
                 if (self.vaisseau.vie == 0):
-                    self.parent.rejouer()
+                    self.parent.gameOver()
                 break
 
     #Collision asteroide/vaisseau
@@ -174,15 +199,13 @@ class Modele:
                 else:
                     self.vaisseau.vie -= a.degat
                 if (self.vaisseau.vie == 0):
-                    self.parent.rejouer()
+                    self.parent.gameOver()
                 break
 
     #Collision powerup/vaisseau
     def collisionPowerupVaisseau(self):
         for p in list(self.powerups):
             if p.x - p.taille_x <= self.vaisseau.x <= p.x + p.taille_x and p.y - p.taille_y <= self.vaisseau.y <= p.y + p.taille_y:
-                print("collision")
-
                 match p.type :
                     case "vie":
                         self.vaisseau.vie += 1
@@ -199,15 +222,16 @@ class Modele:
         for o in list(self.ovnis):
             for p in list(self.vaisseau.projectiles):
                 if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
-                    self.supprimerOvni(o.id)
+                    o.vie -= 1
                     self.vaisseau.projectiles.remove(p)
-                    self.score += 1
-
-                    alea_power = random.random()
-                    if alea_power < 0.1:
-                        nouveau_power = Powerup(o.x,o.y, 10, createur_identifiant())
-                        self.powerups.append(nouveau_power)
-                    break
+                    if (o.vie == 0):
+                        self.supprimerOvni(o.id)
+                        self.score += 1
+                        alea_power = random.random()
+                        if alea_power < 0.1:
+                            nouveau_power = Powerup(o.x,o.y, 10, createur_identifiant())
+                            self.powerups.append(nouveau_power)
+                        break
 
     # verifier tous les collisions
     def verifierToutCollisions(self):
@@ -257,7 +281,8 @@ class Modele:
                 random.randint(0, self.largeur),
                 0,
                 random.randint(2, 5),
-                createur_identifiant()
+                createur_identifiant(),
+                self.niveau
             )
             self.ovnis.append(nouvel_ovni)
 
