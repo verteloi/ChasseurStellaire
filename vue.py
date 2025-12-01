@@ -50,6 +50,15 @@ class Vue:
         self.btn_enregistrerScore = tk.Button(self.root, text="Enregistrer Score", font=("Arial", 16), command=self.controleur.enregistrerScore)
         self.canevas.create_window(300, 450, window=self.btn_enregistrerScore)
 
+    def affichageNiveau(self, niveau):
+        self.delay = 2500
+        self.texteNiveau = self.canevas.create_text(300, 250, text=f"NIVEAU {niveau}", font=("Arial", 40, "bold"), fill="yellow")
+
+        def effacer_text():
+            self.canevas.delete(self.texteNiveau)
+        
+        self.root.after(self.delay, effacer_text)
+
     # ---------- Affichage du jeu ----------
     def afficher_jeu(self):
         modele = self.modele

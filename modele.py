@@ -309,3 +309,7 @@ class Modele:
                 self.niveau = 4
             case 100:
                 self.niveau = 5
+        
+        return self.niveau
+        
+        
