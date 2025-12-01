@@ -9,15 +9,17 @@ def createur_identifiant():
     return "id_"+str(prochain_id)
 
 class Projectile:
-    def __init__(self, x, y):
+    def __init__(self, x, y, vx = 0):
         self.x = x
         self.y = y
+        self.vx = vx
         self.vitesse = -10  # vers le haut
         self.taille_x = 2
         self.taille_y = 10
 
     def mise_a_jour(self):
         self.y += self.vitesse
+        self.x += self.vx
 
 class Powerup:
     def __init__(self, x, y, vitesse, id):
@@ -75,24 +77,32 @@ class Vaisseau:
                 nouveau_proj = Projectile(self.x, self.y - 20)
                 self.projectiles.append(nouveau_proj)
             case 3:
-                nouveau_proj = Projectile(self.x, self.y - 20)
-                self.projectiles.append(nouveau_proj)
-                nouveau_proj = Projectile(self.x - 20, self.y - 20)
-                self.projectiles.append(nouveau_proj)
-                nouveau_proj = Projectile(self.x + 20, self.y - 20)
-                self.projectiles.append(nouveau_proj)
+                centre = Projectile(self.x, self.y - 20)                      
+                gauche = Projectile(self.x - 20, self.y - 20, vx=-3)           
+                droite = Projectile(self.x + 20, self.y - 20, vx=3)           
+                self.projectiles.extend([centre, gauche, droite])
             case 4:
-                self.taille_x = 4
-                nouveau_proj = Projectile(self.x - 10, self.y - 20)
-                self.projectiles.append(nouveau_proj)
-                nouveau_proj = Projectile(self.x + 10, self.y - 20)
-                self.projectiles.append(nouveau_proj)
-                nouveau_proj = Projectile(self.x - 20, self.y - 20)
-                self.projectiles.append(nouveau_proj)
-                nouveau_proj = Projectile(self.x + 20, self.y - 20)
-                self.projectiles.append(nouveau_proj)
+                tir1 = Projectile(self.x - 20, self.y - 20)
+                tir2 = Projectile(self.x - 7, self.y - 20)
+                tir3 = Projectile(self.x + 7, self.y - 20)
+                tir4 = Projectile(self.x + 20, self.y - 20)
+
+                self.projectiles.extend([tir1, tir2, tir3, tir4])
+
             case 5:
-                self.niveau = 5
+                # Center
+                centre = Projectile(self.x, self.y - 20)
+                # Inner diagonals (mild angle)
+                inner_left = Projectile(self.x - 15, self.y - 20, vx=-2)
+                inner_right = Projectile(self.x + 15, self.y - 20, vx=2)
+                # Outer diagonals (stronger angle)
+                outer_left = Projectile(self.x - 30, self.y - 20, vx=-4)
+                outer_right = Projectile(self.x + 30, self.y - 20, vx=4)
+                self.projectiles.extend([
+                    centre,
+                    inner_left, inner_right,
+                    outer_left, outer_right
+                ])
 
     def mise_a_jour(self):
         for p in self.projectiles:
@@ -276,7 +286,7 @@ class Modele:
 
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
-        if alea_ovni < 0.10:
+        if alea_ovni < 0.04 * self.niveau:
             nouvel_ovni = OVNI(
                 random.randint(0, self.largeur),
                 0,
@@ -287,7 +297,7 @@ class Modele:
             self.ovnis.append(nouvel_ovni)
 
         alea_asteroide = random.random()
-        if alea_asteroide < 0.01:
+        if alea_asteroide < 0.015 * self.niveau:
             nouvel_ast = Asteroide(
                 random.randint(0, self.largeur),
                 0,
