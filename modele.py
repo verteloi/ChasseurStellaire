@@ -137,7 +137,7 @@ class Modele:
                 self.supprimerOvni(o.id)
                 self.vaisseau.vie -= o.degat
                 if (self.vaisseau.vie == 0):
-                    self.parent.rejouer()
+                    self.parent.gameOver()
                 break
 
     #Collision asteroide/vaisseau
@@ -147,7 +147,7 @@ class Modele:
                 self.supprimerAsteroide(a.id)
                 self.vaisseau.vie -= a.degat
                 if (self.vaisseau.vie == 0):
-                    self.parent.rejouer()
+                    self.parent.gameOver()
                 break
 
     #Collision powerup/vaisseau
