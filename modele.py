@@ -23,9 +23,31 @@ class Explosion:
     def __init__(self ,x, y):
         self.x = x
         self.y = y
-        self.taille_x = 20
-        self.taille_y = 20
+        self.taille_x = 10
+        self.taille_y = 10
+        self.tik = 2.5
+        self.opacity = 1
+        self.status = 1
 
+    def mise_a_jour(self):
+        
+        if (self.taille_y <= 30 and self.status == 1):
+            self.taille_x += self.tik
+            self.taille_y += self.tik
+            if(self.taille_x >= 30):
+                self.status = 2
+
+        if(self.status == 2):
+            self.taille_x -= self.tik
+            self.taille_y -= self.tik
+        if(self.taille_x <= 0 and self.taille_y <= 0 and self.status == 2):
+            self.taille_x = 0
+            self.taille_y = 0
+            return 3
+        
+        
+
+            
 class Powerup:
     def __init__(self, x, y, vitesse, id, type):
         self.x = x
@@ -88,6 +110,8 @@ class Vaisseau:
             p for p in self.projectiles
             if p.y > 0
         ]
+
+
 
 
 class OVNI:
@@ -193,6 +217,14 @@ class Modele:
                     self.explosion.append(nouvelle_explosion)
                     break
 
+
+    def mise_a_jour_explosions(self):
+        for e in list(self.explosion):
+            print("Dans la boucle")
+            doit_supprimer = e.mise_a_jour()
+            if doit_supprimer:
+                self.explosion.remove(e)
+
     # verifier tous les collisions
     def verifierToutCollisions(self):
         self.collisionOvniVaisseau()
@@ -200,6 +232,7 @@ class Modele:
         self.ExplosionOvni()
         self.collisionProjectile()
         self.collisionPowerupVaisseau()
+        self.mise_a_jour_explosions()
 
     def supprimerOvni(self, id):
         for o in self.ovnis:
@@ -266,6 +299,7 @@ class Modele:
 
         for p in self.powerups:
             p.mise_a_jour()
+        
 
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
