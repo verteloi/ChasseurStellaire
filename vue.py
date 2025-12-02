@@ -1,4 +1,5 @@
 import tkinter as tk
+import time
 
 class Vue:
     def __init__(self, controleur, modele):
@@ -62,7 +63,7 @@ class Vue:
     # ---------- Affichage du jeu ----------
     def afficher_jeu(self):
         modele = self.modele
-        self.canevas.delete("all")
+        self.canevas.delete("jeu")
 
         # --- Vaisseau du joueur ---
         v = modele.vaisseau
@@ -71,14 +72,14 @@ class Vue:
             v.y - 5,
             v.x + v.taille_x,
             v.y + 5,
-            fill="grey"
+            fill="grey", tags="jeu"
         )
         self.canevas.create_oval(
             v.x - (v.taille_x // 2),
             v.y - v.taille_y,
             v.x + (v.taille_x // 2),
             v.y - 5,
-            fill="lightblue"
+            fill="lightblue", tags="jeu"
         )
         self.canevas.create_line(
             v.x,
@@ -86,7 +87,7 @@ class Vue:
             v.x,
             v.y - v.taille_y - 5,
             fill="grey",
-            width=2
+            width=2, tags="jeu"
         )
 
         if (v.shield == True):
@@ -96,7 +97,7 @@ class Vue:
                 v.x + 10,             
                 v.y - v.taille_y - 10,    
                 fill="deepskyblue",
-                width=4
+                width=4 , tags="jeu"
         )
 
         # --- Projectiles ---
@@ -106,7 +107,7 @@ class Vue:
                 p.y - p.taille_y,
                 p.x + p.taille_x,
                 p.y,
-                fill="yellow"
+                fill="yellow" , tags="jeu"
             )
 
         # --- OVNIs ---
@@ -116,7 +117,7 @@ class Vue:
                 o.y - o.taille_y,
                 o.x + o.taille_x,
                 o.y + o.taille_y,
-                fill="red"
+                fill="red" , tags="jeu"
             )
             self.canevas.create_line(
                 o.x,
@@ -124,7 +125,7 @@ class Vue:
                 o.x,
                 o.y + o.taille_y + 6,
                 fill="orange",
-                width=2
+                width=2, tags="jeu"
             )
 
         # --- Astéroïdes ---
@@ -134,7 +135,7 @@ class Vue:
                 a.y - a.taille_y,
                 a.x + a.taille_x,
                 a.y + a.taille_y,
-                fill="gray"
+                fill="gray", tags="jeu"
             )
 
         # --- Powerups ---
@@ -144,7 +145,7 @@ class Vue:
                 p.y - p.taille_y,
                 p.x + p.taille_x,
                 p.y + p.taille_y,
-                fill=p.color
+                fill=p.color, tags="jeu"
             )
 
             # self.canevas.create_text(

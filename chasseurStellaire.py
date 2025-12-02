@@ -5,7 +5,7 @@ class Controleur:
     def __init__(self):
         self.modele = Modele(self,600,800)
         self.vue = Vue(self, self.modele)
-        self.niveau_courant = 1
+        self.niveau_courant = 0
         self.boucle_jeu()
         self.vue.root.mainloop()
 
@@ -38,6 +38,7 @@ class Controleur:
         self.modele.shooting = False
 
     def rejouer(self):
+        self.vue.canevas.delete("all")
         self.modele = Modele(self,600,800)
         self.vue.modele = self.modele
         self.boucle_jeu()
