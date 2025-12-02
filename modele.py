@@ -168,6 +168,32 @@ class Asteroide:
     def mise_a_jour(self):
         self.y += self.vy
 
+class Explosion:
+    def __init__(self ,x, y):
+        self.x = x
+        self.y = y
+        self.taille_x = 10
+        self.taille_y = 10
+        self.tik = 2.5
+        self.opacity = 1
+        self.status = 1
+
+    def mise_a_jour(self):
+        
+        if (self.taille_y <= 30 and self.status == 1):
+            self.taille_x += self.tik
+            self.taille_y += self.tik
+            if(self.taille_x >= 30):
+                self.status = 2
+
+        if(self.status == 2):
+            self.taille_x -= self.tik
+            self.taille_y -= self.tik
+        if(self.taille_x <= 0 and self.taille_y <= 0 and self.status == 2):
+            self.taille_x = 0
+            self.taille_y = 0
+            return 3
+
 
 # ------------------ MODÈLE ------------------
 
@@ -184,6 +210,7 @@ class Modele:
         self.niveau = 1
         self.compteur = 0
         self.shooting = False
+        self.explosion = []
 
 
     #Collision ovni/vaisseau
@@ -243,17 +270,36 @@ class Modele:
                             self.powerups.append(nouveau_power)
                         break
 
+    # def ExplosionOvni(self):
+    #     for o in list(self.ovnis):
+    #         for p in list(self.vaisseau.projectiles):
+    #             if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
+    #                 print("Explosion")
+    #                 nouvelle_explosion = Explosion(o.x,o.y)
+    #                 self.explosion.append(nouvelle_explosion)
+    #                 break
+    
+    def mise_a_jour_explosions(self):
+        for e in list(self.explosion):
+            print("Dans la boucle")
+            doit_supprimer = e.mise_a_jour()
+            if doit_supprimer:
+                self.explosion.remove(e)
+
     # verifier tous les collisions
     def verifierToutCollisions(self):
         self.collisionOvniVaisseau()
         self.collisionAsteroideVaisseau()
         self.collisionProjectile()
         self.collisionPowerupVaisseau()
-
+        self.mise_a_jour_explosions()
+        
     def supprimerOvni(self, id):
         for o in self.ovnis:
             if o.id == id:
                 self.ovnis.remove(o)
+                nouvelle_explosion = Explosion(o.x,o.y)
+                self.explosion.append(nouvelle_explosion)
                 break
 
     def supprimerAsteroide(self, id):
@@ -344,3 +390,4 @@ class Modele:
                 self.niveau = 4
             case 100:
                 self.niveau = 5
+        return self.niveau
