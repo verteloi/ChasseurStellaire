@@ -243,11 +243,18 @@ class Modele:
         self.verifierToutCollisions()
         self.levelUp()
 
+        # Autoshoot
+        if not self.shooting :   
+             self.autotir = 0
+
         if self.niveau >= 2:
             if self.shooting:
-                if self.compteur >= 4:   # 7 frames ~ cooldown
-                    self.vaisseau.tirer()
-                    self.compteur = 0
+                self.autotir += 1
+                if self.autotir > 3:
+                    if self.compteur >= 4:  # 7 frames ~ cooldown
+
+                        self.vaisseau.tirer()
+                        self.compteur = 0
 
 
         # Apparition aléatoire des ennemis
