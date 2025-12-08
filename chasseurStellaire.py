@@ -17,14 +17,14 @@ class Controleur:
             self.modele.mise_a_jour()
             self.vue.afficher_jeu()
             self.vue.root.after(30, self.boucle_jeu)
-            nouveau_niveau = self.modele.levelUp()
-            if self.niveau_courant != nouveau_niveau:
-                self.niveauActuel()
-                self.niveau_courant = nouveau_niveau
+            nouveau_stage = self.modele.stageUp()
+            if self.niveau_courant != nouveau_stage:
+                self.stageActuel()
+                self.niveau_courant = nouveau_stage
 
-    def niveauActuel(self):
-        niveauActuel = self.modele.levelUp()
-        self.vue.affichageNiveau(niveauActuel)
+    def stageActuel(self):
+        stageActuel = self.modele.stageUp()
+        self.vue.affichageStage(stageActuel)
 
     # Méthodes appelées par la Vue (via bindings)
     def deplacer_vaisseau(self, x):

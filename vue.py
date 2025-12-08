@@ -50,12 +50,12 @@ class Vue:
         self.btn_enregistrerScore = tk.Button(self.root, text="Enregistrer Score", font=("Arial", 16), command=self.controleur.enregistrerScore)
         self.canevas.create_window(300, 450, window=self.btn_enregistrerScore)
 
-    def affichageNiveau(self, niveau):
+    def affichageStage(self, stage):
         self.delay = 2500
-        self.texteNiveau = self.canevas.create_text(300, 250, text=f"NIVEAU {niveau}", font=("Arial", 40, "bold"), fill="yellow")
+        self.texteStage = self.canevas.create_text(300, 250, text=f"STAGE {stage}", font=("Arial", 40, "bold"), fill="yellow")
 
         def effacer_text():
-            self.canevas.delete(self.texteNiveau)
+            self.canevas.delete(self.texteStage)
         
         self.root.after(self.delay, effacer_text)
 
@@ -136,6 +136,42 @@ class Vue:
                 a.y + a.taille_y,
                 fill="gray", tags="jeu"
             )
+        
+        # --- boss ---
+        b = modele.boss
+        if (b != 0):
+            self.canevas.create_oval(
+                b.x - b.taille_x // 4,
+                b.y - b.taille_y * 0.5 + 50,
+                b.x + b.taille_x // 4,
+                b.y + 60,
+                fill="purple", tags="jeu"
+            )
+
+            self.canevas.create_oval(
+                b.x - b.taille_x,
+                b.y - b.taille_y,
+                b.x + b.taille_x,
+                b.y + b.taille_y,
+                fill=b.couleur, tags="jeu"
+            )
+
+            self.canevas.create_oval(
+                b.x - b.taille_x // 2,
+                b.y - b.taille_y * 1.2,
+                b.x + b.taille_x // 2,
+                b.y,
+                fill="lightblue", tags="jeu"
+            )
+
+            self.canevas.create_oval(
+                b.x - b.taille_x // 7,
+                b.y - b.taille_y * 0.5,
+                b.x + b.taille_x // 7,
+                b.y,
+                fill="white", tags="jeu"
+            )
+
 
         # --- Powerups ---
         for p in modele.powerups:

@@ -138,21 +138,12 @@ class OVNI:
                 self.couleur = "chocolate1"
             case 5:
                 self.couleur = "yellow"
+            case 6:
+                self.couleur = "blue"
 
     def mise_a_jour(self):
         self.y += self.vy
         self.couleur_ovni()
-
-    # def changer_vie(self):
-    #     match self.niveauOvni:
-    #         case 1:
-    #             self.vie = 1
-    #         case 2:
-    #             self.vie = 2
-    #         case 3:
-    #             self.vie = 3
-
-
 
 class Asteroide:
     def __init__(self, x, y, vy, id):
@@ -193,7 +184,20 @@ class Explosion:
             self.taille_x = 0
             self.taille_y = 0
             return 3
+        
+class Boss:
+    def __init__(self, x, y, vy, couleur):
+        self.x = x
+        self.y = y
+        self.vy = vy
+        self.size = random.randint(100, 100)
+        self.taille_x = self.size
+        self.taille_y = self.size - 50
+        self.couleur = couleur
+        self.vie = 100
 
+    def mise_a_jour(self):
+        self.y += self.vy
 
 # ------------------ MODÈLE ------------------
 
@@ -203,6 +207,7 @@ class Modele:
         self.largeur = 600
         self.hauteur = 700
         self.vaisseau = Vaisseau(self.largeur // 2, self.hauteur - 50, self)
+        self.boss = 0
         self.ovnis = []
         self.asteroides = []
         self.powerups = []
@@ -211,6 +216,8 @@ class Modele:
         self.compteur = 0
         self.shooting = False
         self.explosion = []
+        self.stage = 1
+        self.temps = 0
 
 
     #Collision ovni/vaisseau
@@ -249,7 +256,7 @@ class Modele:
                     case "shield":
                         self.vaisseau.shield = True
                     case "exp":
-                        self.score += 1
+                        self.score += 5
 
                 self.supprimerPowerup(p.id)
                 break
@@ -270,29 +277,48 @@ class Modele:
                             self.powerups.append(nouveau_power)
                         break
 
-    # def ExplosionOvni(self):
-    #     for o in list(self.ovnis):
-    #         for p in list(self.vaisseau.projectiles):
-    #             if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
-    #                 print("Explosion")
-    #                 nouvelle_explosion = Explosion(o.x,o.y)
-    #                 self.explosion.append(nouvelle_explosion)
-    #                 break
+    #Collision tire/boss:
+    def collisionProjectile(self):
+        for o in list(self.ovnis):
+            for p in list(self.vaisseau.projectiles):
+                if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
+                    o.vie -= 1
+                    self.vaisseau.projectiles.remove(p)
+                    if (o.vie == 0):
+                        self.supprimerOvni(o.id)
+                        self.score += 1
+                        alea_power = random.random()
+                        if alea_power < 0.1:
+                            nouveau_power = Powerup(o.x,o.y, 10, createur_identifiant())
+                            self.powerups.append(nouveau_power)
+                        break
+
+    def collisionProjectileAstroide(self):
+        for a in list(self.asteroides):
+            for p in list(self.vaisseau.projectiles):
+                if a.x - a.taille_x <= p.x <= a.x + a.taille_x and a.y - a.taille_y <= p.y <= a.y + a.taille_y:
+                    self.vaisseau.projectiles.remove(p)
+                    break
     
     def mise_a_jour_explosions(self):
         for e in list(self.explosion):
-            print("Dans la boucle")
             doit_supprimer = e.mise_a_jour()
             if doit_supprimer:
                 self.explosion.remove(e)
 
+    def mise_a_jour_boss(self):
+        pass
+            
+    
     # verifier tous les collisions
     def verifierToutCollisions(self):
         self.collisionOvniVaisseau()
         self.collisionAsteroideVaisseau()
         self.collisionProjectile()
         self.collisionPowerupVaisseau()
+        self.collisionProjectileAstroide()
         self.mise_a_jour_explosions()
+        self.mise_a_jour_boss()
         
     def supprimerOvni(self, id):
         for o in self.ovnis:
@@ -322,28 +348,35 @@ class Modele:
         self.vaisseau.mise_a_jour()
         self.verifierToutCollisions()
         self.levelUp()
+        self.stageUp()
+
+        # autoshoot
+        if not self.shooting :
+             self.autotir = 0
 
         if self.niveau >= 2:
             if self.shooting:
-                if self.compteur >= 4:   # 7 frames ~ cooldown
-                    self.vaisseau.tirer()
-                    self.compteur = 0
+                self.autotir += 1
+                if self.autotir > 3:
+                    if self.compteur >= 4:  # 7 frames ~ cooldown
+                        self.vaisseau.tirer()
+                        self.compteur = 0
 
 
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
-        if alea_ovni < 0.04 * self.niveau:
+        if alea_ovni < 0.04 * self.stage:
             nouvel_ovni = OVNI(
                 random.randint(0, self.largeur),
                 0,
                 random.randint(2, 5),
                 createur_identifiant(),
-                self.niveau
+                min(self.stage, 3)
             )
             self.ovnis.append(nouvel_ovni)
 
         alea_asteroide = random.random()
-        if alea_asteroide < 0.015 * self.niveau:
+        if alea_asteroide < 0.015 * self.stage:
             nouvel_ast = Asteroide(
                 random.randint(0, self.largeur),
                 0,
@@ -379,6 +412,7 @@ class Modele:
         ]
 
         self.compteur += 1
+        self.temps += 1
 
     def levelUp(self):
         match self.score :
@@ -391,3 +425,19 @@ class Modele:
             case 100:
                 self.niveau = 5
         return self.niveau
+    
+    def stageUp(self):
+        match self.temps:
+            case 350:
+                self.stage = 2
+                self.boss = Boss(300, 100, 10, "grey")
+            case 700:
+                self.stage = 3
+            case 1050:
+                self.stage = 4
+            case 1400:
+                self.stage = 5
+            case 1750:
+                self.stage = 6
+                self.boss = Boss(300, 100, 10, "grey")
+        return self.stage
