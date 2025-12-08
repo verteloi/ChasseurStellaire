@@ -113,6 +113,20 @@ class Vaisseau:
             if p.y > 0
         ]
 
+class MINE:
+    def __init__(self,x,y,vy,vie):
+        self.x = x
+        self.y = y
+        self.vy = vy
+        self.taille_x = 6
+        self.taille_y = 6
+        self.vie = vie
+        self.degat = 1
+
+    def mise_a_jour(self):
+        self.y += self.vy
+
+
 
 class OVNI:
     def __init__(self, x, y, vy, id, vie):
@@ -200,6 +214,7 @@ class Modele:
         self.compteur = 0
         self.shooting = False
         self.explosion = []
+        self.mine = []
 
 
     #Collision ovni/vaisseau
@@ -375,6 +390,11 @@ class Modele:
             if p.y < self.hauteur
         ]
 
+        self.mine = [
+            m for m in self.mine
+            if m.y < self.hauteur
+        ]
+        
         self.compteur += 1
 
     def levelUp(self):
