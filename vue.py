@@ -172,6 +172,9 @@ class Vue:
                 fill="white", tags="jeu"
             )
 
+            # --- boss lazer ---
+            if self.modele.temps > 450:
+                self.create_boss_laser(self.canevas, b, couleur= "purple")
 
         # --- Powerups ---
         for p in modele.powerups:
@@ -217,3 +220,29 @@ class Vue:
 
     def release(self, evt):
         self.controleur.release()
+
+
+
+    def create_boss_laser(self, canvas, b, largeur=20, longueur=600, couleur="purple"):
+        x1 = b.x // 2 + 140
+        y1 = b.y + b.taille_y
+        x2 = x1 + largeur 
+        y2 = y1 + longueur 
+
+        r = largeur // 2  
+
+
+        canvas.create_rectangle(
+            x1, y1, x2, y2,
+            fill=couleur, outline="", tags="laser"
+        )
+
+        canvas.create_oval(
+            x1 - r, y1, x1 + r, y2,
+            fill=couleur, outline="", tags="laser"
+        )
+
+        canvas.create_oval(
+            x2 - r, y1, x2 + r, y2,
+            fill=couleur, outline="", tags="laser"
+        )
