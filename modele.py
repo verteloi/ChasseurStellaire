@@ -170,7 +170,6 @@ class Explosion:
         self.status = 1
 
     def mise_a_jour(self):
-        
         if (self.taille_y <= 30 and self.status == 1):
             self.taille_x += self.tik
             self.taille_y += self.tik
@@ -214,6 +213,7 @@ class Modele:
         self.score = 0
         self.niveau = 1
         self.compteur = 0
+        self.compteurBoss = 0
         self.shooting = False
         self.explosion = []
         self.stage = 1
@@ -307,8 +307,11 @@ class Modele:
                 self.explosion.remove(e)
 
     def mise_a_jour_boss(self):
-        pass
-            
+        if (self.boss != 0):
+            if (self.boss.x >= 800):
+                self.boss.taille_x -= 1
+            if (self.boss.x <= 0):
+                self.boss.taille_x += 1
     
     # verifier tous les collisions
     def verifierToutCollisions(self):
