@@ -24,6 +24,7 @@ class Vue:
         # Bindings (la Vue gère le canevas)
         self.canevas.bind("<Motion>", self.deplacer_vaisseau)
         self.canevas.bind("<Button-1>", self.tirer)
+        self.canevas.bind("<ButtonRelease-1>", self.release)
 
     def creer_frame_infos(self):
         self.frame_infos = tk.Frame(self.frame_principale, bg="#222")
@@ -38,24 +39,30 @@ class Vue:
         self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", bg="#222", font=("Arial", 12))
         self.label_score.pack(pady=10)
 
-        self.btn_rejouer = tk.Button(self.frame_infos, text="Rejouer", command=self.rejouer)
-        self.btn_rejouer.pack(pady=10)
-
-        self.btn_enregistrerScore = tk.Button(self.frame_infos, text="Enregistrer Score")
-        self.btn_enregistrerScore.pack(pady=10)
-
-    # ---------- Fin du jeu ---------
-
     def clear_window(self):
-        self.root.quit()
-        self.canevas.config(bg="white")
-        self.canevas.create_text(200, 300, text="Game Over, pute", font=("Arial", 50), fill="black")
-        self.canevas.update()
+        self.canevas.delete("all")
+        self.canevas.config(bg="black")
+
+        self.canevas.create_text(300, 250, text="GAME OVER", font=("Arial", 40, "bold"), fill="red")
+        self.canevas.create_text(300, 320, text=f"Score finale : {self.modele.score} ovnis détruits", font=("Arial", 20), fill="white")
+        self.btn_rejouer = tk.Button(self.root, text="Réessayer?", font=("Arial", 16), command=self.controleur.rejouer)
+        self.canevas.create_window(300, 400, window=self.btn_rejouer)
+        self.btn_enregistrerScore = tk.Button(self.root, text="Enregistrer Score", font=("Arial", 16), command=self.controleur.enregistrerScore)
+        self.canevas.create_window(300, 450, window=self.btn_enregistrerScore)
+
+    def affichageStage(self, stage):
+        self.delay = 2500
+        self.texteStage = self.canevas.create_text(300, 250, text=f"STAGE {stage}", font=("Arial", 40, "bold"), fill="yellow")
+
+        def effacer_text():
+            self.canevas.delete(self.texteStage)
+        
+        self.root.after(self.delay, effacer_text)
 
     # ---------- Affichage du jeu ----------
     def afficher_jeu(self):
         modele = self.modele
-        self.canevas.delete("all")
+        self.canevas.delete("jeu")
 
         # --- Vaisseau du joueur ---
         v = modele.vaisseau
@@ -64,22 +71,32 @@ class Vue:
             v.y - 5,
             v.x + v.taille_x,
             v.y + 5,
-            fill="blue"
+            fill="grey", tags="jeu"
         )
         self.canevas.create_oval(
             v.x - (v.taille_x // 2),
             v.y - v.taille_y,
             v.x + (v.taille_x // 2),
             v.y - 5,
-            fill="lightblue"
+            fill="lightblue", tags="jeu"
         )
         self.canevas.create_line(
             v.x,
             v.y - v.taille_y,
             v.x,
             v.y - v.taille_y - 5,
-            fill="white",
-            width=2
+            fill="grey",
+            width=2, tags="jeu"
+        )
+
+        if (v.shield == True):
+            self.canevas.create_line(
+                v.x - 10,             
+                v.y - v.taille_y - 10,    
+                v.x + 10,             
+                v.y - v.taille_y - 10,    
+                fill="deepskyblue",
+                width=4, tags="jeu"
         )
 
         # --- Projectiles ---
@@ -89,7 +106,7 @@ class Vue:
                 p.y - p.taille_y,
                 p.x + p.taille_x,
                 p.y,
-                fill="yellow"
+                fill="yellow", tags="jeu"
             )
 
         # --- OVNIs ---
@@ -99,15 +116,15 @@ class Vue:
                 o.y - o.taille_y,
                 o.x + o.taille_x,
                 o.y + o.taille_y,
-                fill="red"
+                fill=o.couleur, tags="jeu"
             )
             self.canevas.create_line(
                 o.x,
                 o.y + o.taille_y,
                 o.x,
                 o.y + o.taille_y + 6,
-                fill="orange",
-                width=2
+                fill="grey",
+                width=2, tags="jeu"
             )
 
         # --- Astéroïdes ---
@@ -117,17 +134,70 @@ class Vue:
                 a.y - a.taille_y,
                 a.x + a.taille_x,
                 a.y + a.taille_y,
-                fill="gray"
+                fill="gray", tags="jeu"
             )
+        
+        # --- boss ---
+        b = modele.boss
+        if (b != 0):
+            self.canevas.create_oval(
+                b.x - b.taille_x // 4,
+                b.y - b.taille_y * 0.5 + 50,
+                b.x + b.taille_x // 4,
+                b.y + 60,
+                fill="purple", tags="jeu"
+            )
+
+            self.canevas.create_oval(
+                b.x - b.taille_x,
+                b.y - b.taille_y,
+                b.x + b.taille_x,
+                b.y + b.taille_y,
+                fill=b.couleur, tags="jeu"
+            )
+
+            self.canevas.create_oval(
+                b.x - b.taille_x // 2,
+                b.y - b.taille_y * 1.2,
+                b.x + b.taille_x // 2,
+                b.y,
+                fill="lightblue", tags="jeu"
+            )
+
+            self.canevas.create_oval(
+                b.x - b.taille_x // 7,
+                b.y - b.taille_y * 0.5,
+                b.x + b.taille_x // 7,
+                b.y,
+                fill="white", tags="jeu"
+            )
+
 
         # --- Powerups ---
         for p in modele.powerups:
-            self.canevas.create_rectangle(
+            self.canevas.create_oval(
                 p.x - p.taille_x,
                 p.y - p.taille_y,
                 p.x + p.taille_x,
                 p.y + p.taille_y,
-                fill="purple"
+                fill=p.color, tags="jeu"
+            )
+
+            # self.canevas.create_text(
+            #     p.x, p.y + 10,                # Coordinates of the text's anchor point
+            #         text="+1",    # The string to display
+            #         fill="white",        # Text color
+            #         font=("Arial", 20),  # Font settings
+            # )
+
+        # --- Explosion --
+        for e in modele.explosion:
+            self.canevas.create_oval(
+                e.x - e.taille_x,
+                e.y - e.taille_y,
+                e.x + e.taille_x,
+                e.y + e.taille_y,
+                fill="red", tags="jeu"
             )
 
         # --- Infos ---
@@ -144,3 +214,6 @@ class Vue:
 
     def rejouer(self):
         self.controleur.rejouer()
+
+    def release(self, evt):
+        self.controleur.release()
