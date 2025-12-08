@@ -1,5 +1,4 @@
 import tkinter as tk
-import time
 
 class Vue:
     def __init__(self, controleur, modele):
@@ -97,7 +96,7 @@ class Vue:
                 v.x + 10,             
                 v.y - v.taille_y - 10,    
                 fill="deepskyblue",
-                width=4 , tags="jeu"
+                width=4, tags="jeu"
         )
 
         # --- Projectiles ---
@@ -107,7 +106,7 @@ class Vue:
                 p.y - p.taille_y,
                 p.x + p.taille_x,
                 p.y,
-                fill="yellow" , tags="jeu"
+                fill="yellow", tags="jeu"
             )
 
         # --- OVNIs ---
@@ -117,14 +116,14 @@ class Vue:
                 o.y - o.taille_y,
                 o.x + o.taille_x,
                 o.y + o.taille_y,
-                fill="red" , tags="jeu"
+                fill=o.couleur, tags="jeu"
             )
             self.canevas.create_line(
                 o.x,
                 o.y + o.taille_y,
                 o.x,
                 o.y + o.taille_y + 6,
-                fill="orange",
+                fill="grey",
                 width=2, tags="jeu"
             )
 
@@ -154,6 +153,16 @@ class Vue:
             #         fill="white",        # Text color
             #         font=("Arial", 20),  # Font settings
             # )
+
+        # --- Explosion --
+        for e in modele.explosion:
+            self.canevas.create_oval(
+                e.x - e.taille_x,
+                e.y - e.taille_y,
+                e.x + e.taille_x,
+                e.y + e.taille_y,
+                fill="red", tags="jeu"
+            )
 
         # --- Infos ---
         self.label_vie.config(text=f"Vies : {v.vie}")
