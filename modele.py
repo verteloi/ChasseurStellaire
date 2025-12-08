@@ -21,6 +21,17 @@ class Projectile:
         self.y += self.vitesse
         self.x += self.vx
 
+class ProjectileOvni:####
+    def __init__(self, x, y):####
+        self.x = x###
+        self.y = y####
+        self.vitesse = 10  # vers le bas ####
+        self.taille_x = 2 ####
+        self.taille_y = 10###
+
+    def mise_a_jour(self):
+        self.y += self.vitesse  ### 
+
 class Powerup:
     def __init__(self, x, y, vitesse, id):
         self.x = x
@@ -121,6 +132,7 @@ class OVNI:
         self.vy = vy
         self.taille_x = 12
         self.taille_y = 6
+        self.projectiles = []#######
         self.id = id 
         self.vie = vie
         self.degat = 1
@@ -141,7 +153,18 @@ class OVNI:
             case 6:
                 self.couleur = "blue"
 
+    def ovniTire(self):######
+        nouveau_proj = ProjectileOvni(self.x, self.y + 20) #####
+        self.projectiles.append(nouveau_proj) #####
+
     def mise_a_jour(self):
+        for p in self.projectiles: #####
+            p.mise_a_jour() #####
+
+        self.projectiles = [####
+            p for p in self.projectiles #####
+            if p.y > 0 ####
+        ]
         self.y += self.vy
         self.couleur_ovni()
 
@@ -277,6 +300,20 @@ class Modele:
                             self.powerups.append(nouveau_power)
                         break
 
+    #Collision tireOvni/vaisseau:
+    def collisionProjectileOvni(self):
+        for o in self.ovnis:
+            for p in list(o.projectiles):
+                if p.x - p.taille_x <= self.vaisseau.x <= p.x + p.taille_x and p.y - p.taille_y <= self.vaisseau.y <= p.y + p.taille_y:
+                    o.projectiles.remove(p)
+                    if (self.vaisseau.shield == True):
+                        self.vaisseau.shield = False
+                    else:
+                        self.vaisseau.vie -= p.degat
+                    if (self.vaisseau.vie == 0):
+                        self.parent.gameOver()
+                    break
+
     #Collision tire/boss:
     def collisionProjectile(self):
         for o in list(self.ovnis):
@@ -315,6 +352,7 @@ class Modele:
         self.collisionOvniVaisseau()
         self.collisionAsteroideVaisseau()
         self.collisionProjectile()
+        self.collisionProjectileOvni()
         self.collisionPowerupVaisseau()
         self.collisionProjectileAstroide()
         self.mise_a_jour_explosions()
@@ -346,6 +384,11 @@ class Modele:
         self.vaisseau.tirer()
     def mise_a_jour(self):
         self.vaisseau.mise_a_jour()
+
+        for o in self.ovnis: #######
+            if random.randint(1, 120) == 1: #######
+                o.ovniTire() ########
+
         self.verifierToutCollisions()
         self.levelUp()
         self.stageUp()

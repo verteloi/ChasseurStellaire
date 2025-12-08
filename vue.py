@@ -127,6 +127,15 @@ class Vue:
                 width=2, tags="jeu"
             )
 
+            for p in o.projectiles: ####
+                self.canevas.create_rectangle(####
+                    p.x - p.taille_x,####
+                    p.y - p.taille_y,###
+                    p.x + p.taille_x,###
+                    p.y,####
+                    fill="red" , tags="jeu"####
+                )
+
         # --- Astéroïdes ---
         for a in modele.asteroides:
             self.canevas.create_oval(
