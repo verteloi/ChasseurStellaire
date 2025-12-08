@@ -258,6 +258,13 @@ class Modele:
                             nouveau_power = Powerup(o.x,o.y, 10, createur_identifiant())
                             self.powerups.append(nouveau_power)
                         break
+    
+    def collisionProjectileAstroide(self):
+        for a in list(self.asteroides):
+            for p in list(self.vaisseau.projectiles):
+                if a.x - a.taille_x <= p.x <= a.x + a.taille_x and a.y - a.taille_y <= p.y <= a.y + a.taille_y:
+                    self.vaisseau.projectiles.remove(p)
+                    break
 
     # def ExplosionOvni(self):
     #     for o in list(self.ovnis):
@@ -280,6 +287,7 @@ class Modele:
         self.collisionOvniVaisseau()
         self.collisionAsteroideVaisseau()
         self.collisionProjectile()
+        self.collisionProjectileAstroide()
         self.collisionPowerupVaisseau()
         self.mise_a_jour_explosions()
         
