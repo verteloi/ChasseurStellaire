@@ -182,6 +182,20 @@ class Asteroide:
     def mise_a_jour(self):
         self.y += self.vy
 
+class Etoiles:
+    def __init__(self, x, y, vy, id):
+        self.x = x
+        self.y = y
+        self.vy = vy
+        self.size = 2
+        self.taille_x = self.size
+        self.taille_y = self.size
+        self.degat = 0
+        self.id = id
+
+    def mise_a_jour(self):
+        self.y += self.vy
+
 class Explosion:
     def __init__(self ,x, y):
         self.x = x
@@ -234,6 +248,7 @@ class Modele:
         self.ovnis = []
         self.asteroides = []
         self.powerups = []
+        self.etoiles = []
         self.score = 0
         self.niveau = 1
         self.compteur = 0
@@ -302,14 +317,14 @@ class Modele:
 
     #Collision tireOvni/vaisseau:
     def collisionProjectileOvni(self):
-        for o in self.ovnis:
+        for o in list(self.ovnis):
             for p in list(o.projectiles):
-                if p.x - p.taille_x <= self.vaisseau.x <= p.x + p.taille_x and p.y - p.taille_y <= self.vaisseau.y <= p.y + p.taille_y:
+                if self.vaisseau.x - self.vaisseau.taille_x <= p.x <= self.vaisseau.x + self.vaisseau.taille_x and self.vaisseau.y - self.vaisseau.taille_y <= p.y <= self.vaisseau.y + self.vaisseau.taille_y:
                     o.projectiles.remove(p)
                     if (self.vaisseau.shield == True):
                         self.vaisseau.shield = False
                     else:
-                        self.vaisseau.vie -= p.degat
+                        self.vaisseau.vie -= 1
                     if (self.vaisseau.vie == 0):
                         self.parent.gameOver()
                     break
@@ -336,6 +351,17 @@ class Modele:
                 if a.x - a.taille_x <= p.x <= a.x + a.taille_x and a.y - a.taille_y <= p.y <= a.y + a.taille_y:
                     self.vaisseau.projectiles.remove(p)
                     break
+
+    def collisionProjectileOvniAstroide(self):
+        for a in list(self.asteroides):
+            for o in list(self.ovnis):
+                for p in list(o.projectiles):
+                    if a.x - a.taille_x <= p.x <= a.x + a.taille_x and a.y - a.taille_y <= p.y <= a.y + a.taille_y:
+
+                        o.projectiles.remove(p)
+                        break
+
+
     
     def mise_a_jour_explosions(self):
         for e in list(self.explosion):
@@ -354,6 +380,7 @@ class Modele:
         self.collisionProjectile()
         self.collisionProjectileOvni()
         self.collisionPowerupVaisseau()
+        self.collisionProjectileOvniAstroide()
         self.collisionProjectileAstroide()
         self.mise_a_jour_explosions()
         self.mise_a_jour_boss()
@@ -428,6 +455,16 @@ class Modele:
             )
             self.asteroides.append(nouvel_ast)
 
+        alea_etoiles = random.random()
+        if alea_etoiles < 0.7 * self.stage:
+            nouvel_etoile = Etoiles(
+                random.randint(0, self.largeur),
+                0,
+                random.randint(3, 6),
+                createur_identifiant()
+            )
+            self.etoiles.append(nouvel_etoile)
+
         # Déplacement des ennemis
         for o in self.ovnis:
             o.mise_a_jour()
@@ -437,6 +474,9 @@ class Modele:
 
         for p in self.powerups:
             p.mise_a_jour()
+
+        for e in self.etoiles:
+            e.mise_a_jour()
 
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
@@ -452,6 +492,11 @@ class Modele:
         self.powerups = [
             p for p in self.powerups
             if p.y < self.hauteur
+        ]
+
+        self.etoiles = [
+            e for e in self.etoiles
+            if e.y < self.hauteur
         ]
 
         self.compteur += 1
