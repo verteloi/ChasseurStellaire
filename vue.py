@@ -14,7 +14,7 @@ class Vue:
 
     # ---------- Création de l'interface ----------
     def creer_fenetre_principale(self):
-        self.frame_principale = tk.Frame(self.root)
+        self.frame_principale = tk.Frame(self.root, bg="black")
         self.frame_principale.pack()
 
     def creer_frame_canevas(self):
@@ -27,17 +27,17 @@ class Vue:
         self.canevas.bind("<ButtonRelease-1>", self.release)
 
     def creer_frame_infos(self):
-        self.frame_infos = tk.Frame(self.frame_principale, bg="#222")
-        self.frame_infos.grid(row=0, column=1, sticky="n")
+        self.frame_infos = tk.Frame(self.frame_principale, bg="black")
+        self.frame_infos.grid(row=1, column=0, sticky="n")
 
-        self.label_vie = tk.Label(self.frame_infos, text="Vies : 3", fg="white", bg="#222", font=("Arial", 12))
-        self.label_vie.pack(pady=10)
+        self.label_vie = tk.Label(self.frame_infos, text="Vies : 3", fg="white", bg="black" , font=("Arial", 12), padx=20)
+        self.label_vie.pack(side="left", pady=10)
 
-        self.label_niveau = tk.Label(self.frame_infos, text="Niveau : 1", fg="white", bg="#222", font=("Arial", 12))
-        self.label_niveau.pack(pady=10)
+        self.label_niveau = tk.Label(self.frame_infos, text="Niveau : 1", fg="white", font=("Arial", 12), bg="black", padx=20)
+        self.label_niveau.pack(side="left",pady=10)
 
-        self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", bg="#222", font=("Arial", 12))
-        self.label_score.pack(pady=10)
+        self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", font=("Arial", 12), bg="black", padx=20)
+        self.label_score.pack(side="left", pady=10)
 
     def clear_window(self):
         self.canevas.delete("all")
@@ -144,6 +144,15 @@ class Vue:
                 a.x + a.taille_x,
                 a.y + a.taille_y,
                 fill="gray", tags="jeu"
+            )
+
+        for e in modele.etoiles:
+            self.canevas.create_oval(
+                e.x - e.taille_x,
+                e.y - e.taille_y,
+                e.x + e.taille_x,
+                e.y + e.taille_y,
+                fill="lightgray", tags="jeu"
             )
         
         # --- boss ---
