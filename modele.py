@@ -281,6 +281,15 @@ class Modele:
                     self.vaisseau.projectiles.remove(p)
                     break
 
+    def collisionMineAsteroide(self):
+        for a in list(self.asteroides):
+            for m in list(self.mine):
+                if(a.x - a.taille_x <= m.x <= a.x + a.taille_x and a.y - a.taille_y <= m.y <= a.y + a.taille_y):
+                    self.mine.remove(m)
+                    nouvelle_explosion = Explosion(m.x,m.y)
+                    self.explosion.append(nouvelle_explosion)
+                    break
+
     # def ExplosionOvni(self):
     #     for o in list(self.ovnis):
     #         for p in list(self.vaisseau.projectiles):
@@ -304,6 +313,7 @@ class Modele:
         self.collisionProjectile()
         self.collisionProjectileAstroide()
         self.collisionPowerupVaisseau()
+        self.collisionMineAsteroide()
         self.mise_a_jour_explosions()
         
     def supprimerOvni(self, id):
@@ -365,7 +375,7 @@ class Modele:
             self.asteroides.append(nouvel_ast)
 
         alea_mine = random.random()
-        if alea_mine < 0.0015 * self.niveau:
+        if alea_mine < 0.15 * self.niveau:
             nouvel_mine = MINE(
                 random.randint(0, self.largeur),
                 0,
