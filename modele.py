@@ -188,9 +188,9 @@ class Explosion:
 class Boss:
     def __init__(self, x, y, vy, couleur):
         self.x = x
-        self.y = y
+        self.y = -100
         self.vy = vy
-        self.vx = 8 
+        self.vx = 8
         self.size = random.randint(100, 100)
         self.taille_x = self.size
         self.taille_y = self.size - 50
@@ -209,6 +209,9 @@ class Boss:
         if self.x + self.taille_x > 600:
             self.x = 600 - self.taille_x
             self.vx *= -1
+
+        if (self.y <= 100):
+            self.y += 1
 
 # ------------------ MODÈLE ------------------
 
@@ -229,6 +232,7 @@ class Modele:
         self.explosion = []
         self.stage = 1
         self.temps = 0
+        self.spawn = True
 
 
     #Collision ovni/vaisseau
@@ -377,7 +381,7 @@ class Modele:
 
         # Apparition aléatoire des ennemis
         alea_ovni = random.random()
-        if alea_ovni < 0.04 * self.stage:
+        if alea_ovni < 0.04 * self.stage and self.spawn == True:
             nouvel_ovni = OVNI(
                 random.randint(0, self.largeur),
                 0,
@@ -388,7 +392,7 @@ class Modele:
             self.ovnis.append(nouvel_ovni)
 
         alea_asteroide = random.random()
-        if alea_asteroide < 0.015 * self.stage:
+        if alea_asteroide < 0.015 * self.stage and self.spawn == True:
             nouvel_ast = Asteroide(
                 random.randint(0, self.largeur),
                 0,
@@ -447,13 +451,15 @@ class Modele:
                 if not boss_spawned:
                     self.boss = Boss(300, 100, 10, "grey")
                     boss_spawned = True
+                    self.spawn = False
             case 700:
                 self.stage = 3
-            case 1050:
-                self.stage = 4
-            case 1400:
-                self.stage = 5
-            case 1750:
-                self.stage = 6
+
+            # case 1050:
+            #     self.stage = 4
+            # case 1400:
+            #     self.stage = 5
+            # case 1750:
+            #     self.stage = 6
 
         return self.stage
