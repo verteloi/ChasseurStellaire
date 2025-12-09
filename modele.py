@@ -118,8 +118,8 @@ class MINE:
         self.x = x
         self.y = y
         self.vy = vy
-        self.taille_x = 6
-        self.taille_y = 6
+        self.taille_x = 10
+        self.taille_y = 10
         self.vie = vie
         self.degat = 1
 
@@ -364,6 +364,17 @@ class Modele:
             )
             self.asteroides.append(nouvel_ast)
 
+        alea_mine = random.random()
+        if alea_mine < 0.0015 * self.niveau:
+            nouvel_mine = MINE(
+                random.randint(0, self.largeur),
+                0,
+                random.randint(3,6),
+                createur_identifiant()
+            )
+            self.mine.append(nouvel_mine)
+
+
         # Déplacement des ennemis
         for o in self.ovnis:
             o.mise_a_jour()
@@ -373,6 +384,8 @@ class Modele:
 
         for p in self.powerups:
             p.mise_a_jour()
+        for m in self.mine:
+            m.mise_a_jour()
 
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [

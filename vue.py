@@ -164,6 +164,24 @@ class Vue:
                 fill="red", tags="jeu"
             )
 
+        for m in modele.mine:
+            self.canevas.create_oval(
+                m.x - m.taille_x,
+                m.y - m.taille_y,
+                m.x + m.taille_x,
+                m.y + m.taille_y,
+                fill="#FF9912", tags="jeu"
+            )
+
+        for m in modele.mine:
+            self.canevas.create_oval(
+            m.x - (m.taille_x - 5),
+            m.y - (m.taille_y - 5),
+            m.x + (m.taille_x - 5),
+            m.y + (m.taille_y - 5),
+                fill="red", tags="jeu"
+            )
+
         # --- Infos ---
         self.label_vie.config(text=f"Vies : {v.vie}")
         self.label_niveau.config(text=f"Niveau : {modele.niveau}")
