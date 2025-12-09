@@ -290,6 +290,37 @@ class Modele:
                     self.explosion.append(nouvelle_explosion)
                     break
 
+    def collisionMineOvnis(self):
+        for o in list(self.ovnis):
+            for m in list(self.mine):
+                if(o.x - o.taille_x <= m.x <= o.x + o.taille_x and o.y - o.taille_y <= m.y <= o.y + o.taille_y):
+                    self.mine.remove(m)
+                    self.ovnis.remove(o)
+                    nouvelle_explosion = Explosion(m.x,m.y)
+                    self.explosion.append(nouvelle_explosion)
+                    break
+
+    def collisionMineProjectile(self):
+         for m in list(self.mine):
+            for p in list(self.vaisseau.projectiles):
+                if m.x - m.taille_x <= p.x <= m.x + m.taille_x and m.y - m.taille_y <= p.y <= m.y + m.taille_y:
+                    self.mine.remove(m)
+                    self.vaisseau.projectiles.remove(p)
+                    nouvelle_explosion = Explosion(m.x,m.y)
+                    self.explosion.append(nouvelle_explosion)
+                    break
+
+    def collisionMineVaisseau(self):
+        for m in list(self.mine):
+            if (m.x - m.taille_x <= self.vaisseau.x <= m.x + m.taille_x and m.y - m.taille_y <= self.vaisseau.y <= m.y + m.taille_y):
+                self.vaisseau.vie -= 1
+                self.mine.remove(m)
+                nouvelle_explosion = Explosion(m.x,m.y)
+                self.explosion.append(nouvelle_explosion)
+                break
+                
+
+
     # def ExplosionOvni(self):
     #     for o in list(self.ovnis):
     #         for p in list(self.vaisseau.projectiles):
@@ -314,6 +345,9 @@ class Modele:
         self.collisionProjectileAstroide()
         self.collisionPowerupVaisseau()
         self.collisionMineAsteroide()
+        self.collisionMineOvnis()
+        self.collisionMineProjectile()
+        self.collisionMineVaisseau()
         self.mise_a_jour_explosions()
         
     def supprimerOvni(self, id):
