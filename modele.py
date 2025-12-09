@@ -118,7 +118,7 @@ class OVNI:
     def __init__(self, x, y, vy, id, vie):
         self.x = x
         self.y = y
-        self.vy = vy
+        self.vy = vy 
         self.taille_x = 12
         self.taille_y = 6
         self.id = id 
@@ -190,6 +190,7 @@ class Boss:
         self.x = x
         self.y = y
         self.vy = vy
+        self.vx = 8 
         self.size = random.randint(100, 100)
         self.taille_x = self.size
         self.taille_y = self.size - 50
@@ -197,7 +198,17 @@ class Boss:
         self.vie = 100
 
     def mise_a_jour(self):
-        self.y += self.vy
+        # horizontal movement
+        self.x += self.vx
+
+        # bounce on screen limits
+        if self.x - self.taille_x < 0:
+            self.x = self.taille_x
+            self.vx *= -1
+
+        if self.x + self.taille_x > 600:
+            self.x = 600 - self.taille_x
+            self.vx *= -1
 
 # ------------------ MODÈLE ------------------
 
@@ -307,7 +318,8 @@ class Modele:
                 self.explosion.remove(e)
 
     def mise_a_jour_boss(self):
-        pass
+        if self.boss != 0:
+            self.boss.mise_a_jour()
             
     
     # verifier tous les collisions
@@ -427,10 +439,14 @@ class Modele:
         return self.niveau
     
     def stageUp(self):
+        counter = 0
         match self.temps:
             case 350:
                 self.stage = 2
-                self.boss = Boss(300, 100, 10, "grey")
+                boss_spawned = False
+                if not boss_spawned:
+                    self.boss = Boss(300, 100, 10, "grey")
+                    boss_spawned = True
             case 700:
                 self.stage = 3
             case 1050:
@@ -439,5 +455,5 @@ class Modele:
                 self.stage = 5
             case 1750:
                 self.stage = 6
-                self.boss = Boss(300, 100, 10, "grey")
+
         return self.stage
