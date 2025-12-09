@@ -196,6 +196,7 @@ class Boss:
         self.taille_y = self.size - 50
         self.couleur = couleur
         self.vie = 100
+        self.projectiles_boss = []
 
     def mise_a_jour(self):
         # horizontal movement
@@ -209,6 +210,8 @@ class Boss:
         if self.x + self.taille_x > 600:
             self.x = 600 - self.taille_x
             self.vx *= -1
+
+
 
 # ------------------ MODÈLE ------------------
 
@@ -231,7 +234,7 @@ class Modele:
         self.temps = 0
         self.laserCooldown = 0
         self.laserTimer = 0
-
+        self.projectiles_boss = []
 
     #Collision ovni/vaisseau
     def collisionOvniVaisseau(self):
@@ -351,6 +354,29 @@ class Modele:
                 if v.vie <= 0:
                     self.parent.gameOver()
 
+    def collisionProjectileBossVaisseau(self):
+        v = self.vaisseau
+
+        for p in list(self.projectiles_boss):
+            if (p.x >= v.x - v.taille_x and
+                p.x <= v.x + v.taille_x and
+                p.y >= v.y - v.taille_y and
+                p.y <= v.y + 5):  # bas du vaisseau
+
+                # remove
+                self.projectiles_boss.remove(p)
+
+                # hp down shield
+                if v.shield:
+                    v.shield = False
+                else:
+                    v.vie -= 1
+
+                if v.vie <= 0:
+                    self.parent.gameOver()
+
+                break
+
     def mise_a_jour_explosions(self):
         for e in list(self.explosion):
             doit_supprimer = e.mise_a_jour()
@@ -361,7 +387,31 @@ class Modele:
         if self.boss != 0:
             self.boss.mise_a_jour()
             
-    
+    def boss_tirer(self):
+        if self.boss == 0:
+            return
+        # same as our shooting
+        b = self.boss
+        # Center
+        centre = Projectile(b.x, b.y - 20)
+        centre.vitesse = 7
+        # Inner diagonals 
+        inner_left = Projectile(b.x - 15, b.y - 20, vx=-2)
+        inner_left.vitesse = 7
+        inner_right = Projectile(b.x + 15, b.y - 20, vx=2)
+        inner_right.vitesse = 7
+        # Outer diagonals 
+        outer_left = Projectile(b.x - 30, b.y - 20, vx=-4)
+        outer_left.vitesse = 7
+        outer_right = Projectile(b.x + 30, b.y - 20, vx=4)
+        outer_right.vitesse = 7
+        self.projectiles_boss.extend([
+            centre,
+            inner_left, inner_right,
+            outer_left, outer_right
+        ])        
+
+
     # verifier tous les collisions
     def verifierToutCollisions(self):
         self.collisionOvniVaisseau()
@@ -371,6 +421,7 @@ class Modele:
         self.collisionProjectileAstroide()
         if (self.temps % 200) < 40:
             self.collisionLaserBossVaisseau()
+        self.collisionProjectileBossVaisseau()
         self.mise_a_jour_explosions()
         self.mise_a_jour_boss()
         
@@ -412,7 +463,7 @@ class Modele:
             if self.shooting:
                 self.autotir += 1
                 if self.autotir > 3:
-                    if self.compteur >= 4:  # 7 frames ~ cooldown
+                    if self.compteur >= 4:  # double shoot fix
                         self.vaisseau.tirer()
                         self.compteur = 0
 
@@ -465,10 +516,30 @@ class Modele:
             if p.y < self.hauteur
         ]
 
+
+        # counters and time
         self.compteur += 1
         self.temps += 1
+
+        # stop the laser from one shotting with counter
         if self.laserCooldown > 0:
             self.laserCooldown -= 1
+
+        # shoot every 20 * 30ms
+        if self.boss != 0 and (self.temps % 20) == 0:
+            self.boss_tirer()
+
+        # update boss projectiles
+        for p in self.projectiles_boss:
+            p.mise_a_jour()
+
+        # Delete old projectiles      
+        new_list = []
+        for p in self.projectiles_boss:
+            if p.y < self.hauteur:  # if still on screen
+                new_list.append(p)
+
+        self.projectiles_boss = new_list   # replace old list with cleaned one
 
 
     def levelUp(self):

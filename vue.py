@@ -193,6 +193,15 @@ class Vue:
             #         font=("Arial", 20),  # Font settings
             # )
 
+        # --- Projectiles du boss ---
+        for p in modele.projectiles_boss:
+            self.canevas.create_rectangle(
+                p.x - p.taille_x,
+                p.y - p.taille_y,
+                p.x + p.taille_x,
+                p.y + 4,
+                fill="red", tags="jeu"     # couleur rouge
+            )
         # --- Explosion --
         for e in modele.explosion:
             self.canevas.create_oval(
@@ -246,3 +255,5 @@ class Vue:
             x2 - r, y1, x2 + r, y2,
             fill=couleur, outline="", tags="jeu"   
         )
+    
+    
