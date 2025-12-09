@@ -173,7 +173,7 @@ class Vue:
             )
 
             # --- boss lazer ---
-            if self.modele.temps > 450:
+            if (self.modele.temps % 200) < 40 : # timer sur un intervalle de 6 secondes (je crois)
                 self.create_boss_laser(self.canevas, b, couleur= "purple")
 
         # --- Powerups ---

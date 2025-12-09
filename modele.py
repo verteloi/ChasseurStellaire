@@ -92,10 +92,10 @@ class Vaisseau:
             case 5:
                 # Center
                 centre = Projectile(self.x, self.y - 20)
-                # Inner diagonals (mild angle)
+                # Inner diagonals 
                 inner_left = Projectile(self.x - 15, self.y - 20, vx=-2)
                 inner_right = Projectile(self.x + 15, self.y - 20, vx=2)
-                # Outer diagonals (stronger angle)
+                # Outer diagonals 
                 outer_left = Projectile(self.x - 30, self.y - 20, vx=-4)
                 outer_right = Projectile(self.x + 30, self.y - 20, vx=4)
                 self.projectiles.extend([
@@ -229,6 +229,8 @@ class Modele:
         self.explosion = []
         self.stage = 1
         self.temps = 0
+        self.laserCooldown = 0
+        self.laserTimer = 0
 
 
     #Collision ovni/vaisseau
@@ -310,7 +312,45 @@ class Modele:
                 if a.x - a.taille_x <= p.x <= a.x + a.taille_x and a.y - a.taille_y <= p.y <= a.y + a.taille_y:
                     self.vaisseau.projectiles.remove(p)
                     break
-    
+
+    def collisionLaserBossVaisseau(self):
+        # pas de boss ou pas encore de laser affiché
+        if self.boss == 0:
+            return
+
+        b = self.boss
+        v = self.vaisseau
+        # Je dois refaire les calculs de la vue pour pouvoir calc les collisions
+        # Dimensions de create_boss_laser dans view
+        largeur_laser = 20
+        longueur_laser = 600
+
+        # laser
+        x1 = b.x - largeur_laser // 2
+        x2 = b.x + largeur_laser // 2
+        y1 = b.y + b.taille_y
+        y2 = y1 + longueur_laser
+
+        # vaisseau
+        xLeft   = v.x - v.taille_x
+        xRight  = v.x + v.taille_x
+        yTop    = v.y - v.taille_y
+        yBottom = v.y + 5   # environ?
+
+        # si ca touche
+        isTouching = not ( xRight < x1 or xLeft > x2 or yBottom < y1 or yTop > y2)
+
+        if isTouching:
+            #cooldown pour pas insta delete le player
+            if self.laserCooldown == 0:
+                self.laserCooldown = 30
+                if v.shield:
+                    v.shield = False
+                else:
+                    v.vie -= 1
+                if v.vie <= 0:
+                    self.parent.gameOver()
+
     def mise_a_jour_explosions(self):
         for e in list(self.explosion):
             doit_supprimer = e.mise_a_jour()
@@ -329,6 +369,7 @@ class Modele:
         self.collisionProjectile()
         self.collisionPowerupVaisseau()
         self.collisionProjectileAstroide()
+        self.collisionLaserBossVaisseau()
         self.mise_a_jour_explosions()
         self.mise_a_jour_boss()
         
@@ -425,6 +466,9 @@ class Modele:
 
         self.compteur += 1
         self.temps += 1
+        if self.laserCooldown > 0:
+            self.laserCooldown -= 1
+
 
     def levelUp(self):
         match self.score :
