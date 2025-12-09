@@ -369,7 +369,8 @@ class Modele:
         self.collisionProjectile()
         self.collisionPowerupVaisseau()
         self.collisionProjectileAstroide()
-        self.collisionLaserBossVaisseau()
+        if (self.temps % 200) < 40:
+            self.collisionLaserBossVaisseau()
         self.mise_a_jour_explosions()
         self.mise_a_jour_boss()
         
