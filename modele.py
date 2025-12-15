@@ -318,7 +318,15 @@ class Modele:
                 nouvelle_explosion = Explosion(m.x,m.y)
                 self.explosion.append(nouvelle_explosion)
                 break
-                
+    
+    def collsisionExplosionOvni(self):
+        for e in list(self.explosion):
+            for o in list(self.ovnis):
+                if(e.x - e.taille_x <= o.x <= e.x + e.taille_x and e.y - e.taille_y <= o.y <= e.y + e.taille_y):
+                    o.vie -= 1
+                    if (o.vie == 0):
+                        self.supprimerOvni(o.id)
+
 
 
     # def ExplosionOvni(self):
@@ -348,6 +356,7 @@ class Modele:
         self.collisionMineOvnis()
         self.collisionMineProjectile()
         self.collisionMineVaisseau()
+        self.collsisionExplosionOvni()
         self.mise_a_jour_explosions()
         
     def supprimerOvni(self, id):
@@ -409,7 +418,7 @@ class Modele:
             self.asteroides.append(nouvel_ast)
 
         alea_mine = random.random()
-        if alea_mine < 0.15 * self.niveau:
+        if alea_mine < 0.025 * self.niveau:
             nouvel_mine = MINE(
                 random.randint(0, self.largeur),
                 0,
