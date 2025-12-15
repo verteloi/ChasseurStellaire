@@ -327,6 +327,13 @@ class Modele:
                     if (o.vie == 0):
                         self.supprimerOvni(o.id)
 
+    def collisionExplosionOvni(self):
+        for e in list (self.explosion):
+            for m in list(self.ovnis):
+                if(e.x - e.taille_x <= m.x <= e.x + e.taille_x and e.y - e.taille_y <= m.y <= e.y + e.taille_y):
+                    self.mine.remove()
+                
+
 
 
     # def ExplosionOvni(self):
