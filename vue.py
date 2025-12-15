@@ -54,7 +54,17 @@ class Vue:
         self.canevas.create_window(300, 400, window=self.btn_rejouer)
         self.btn_enregistrerScore = tk.Button(self.root, text="Enregistrer Score", font=("Arial", 16), command=self.controleur.enregistrerScore)
         self.canevas.create_window(300, 450, window=self.btn_enregistrerScore)
+    def win(self):
+        self.canevas.delete("all")
+        self.canevas.config(bg="black")
 
+        self.canevas.create_text(300, 250, text="YOU WIN!!", font=("Arial", 40, "bold"), fill="green")
+        self.canevas.create_text(300, 320, text=f"Score finale : {self.modele.score} ovnis détruits", font=("Arial", 20), fill="white")
+        self.btn_rejouer = tk.Button(self.root, text="Play Again?", font=("Arial", 16), command=self.controleur.rejouer)
+        self.canevas.create_window(300, 400, window=self.btn_rejouer)
+        self.btn_enregistrerScore = tk.Button(self.root, text="Enregistrer Score", font=("Arial", 16), command=self.controleur.enregistrerScore)
+        self.canevas.create_window(300, 450, window=self.btn_enregistrerScore)
+        
     def affichageStage(self, stage):
         self.delay = 2500
         self.texteStage = self.canevas.create_text(300, 250, text=f"STAGE {stage}", font=("Arial", 40, "bold"), fill="yellow")
@@ -149,7 +159,7 @@ class Vue:
                     p.y,####
                     fill="red" , tags="jeu"####
                 )
-                
+
         # --- Astéroïdes ---
         for a in modele.asteroides:
             self.canevas.create_oval(

@@ -10,6 +10,10 @@ class Controleur:
         self.vue.root.mainloop()
 
     def boucle_jeu(self):
+        if self.modele.boss:
+            if self.modele.boss.vie <= 0:
+                self.win()
+                return
         if self.modele.vaisseau.vie <= 0:
             self.gameOver()
             return  
@@ -21,6 +25,8 @@ class Controleur:
             if self.niveau_courant != nouveau_stage:
                 self.stageActuel()
                 self.niveau_courant = nouveau_stage
+
+
 
     def stageActuel(self):
         stageActuel = self.modele.stageUp()
@@ -45,6 +51,8 @@ class Controleur:
 
     def gameOver(self):
         self.vue.clear_window()
+    def win(self):
+        self.vue.win()
 
     def enregistrerScore(self):
         try:
