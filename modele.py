@@ -333,21 +333,9 @@ class Modele:
                 if(e.x - e.taille_x <= m.x <= e.x + e.taille_x and e.y - e.taille_y <= m.y <= e.y + e.taille_y):
                     self.mine.remove()
                 
-
-
-
-    # def ExplosionOvni(self):
-    #     for o in list(self.ovnis):
-    #         for p in list(self.vaisseau.projectiles):
-    #             if o.x - o.taille_x <= p.x <= o.x + o.taille_x and o.y - o.taille_y <= p.y <= o.y + o.taille_y:
-    #                 print("Explosion")
-    #                 nouvelle_explosion = Explosion(o.x,o.y)
-    #                 self.explosion.append(nouvelle_explosion)
-    #                 break
     
     def mise_a_jour_explosions(self):
         for e in list(self.explosion):
-            print("Dans la boucle")
             doit_supprimer = e.mise_a_jour()
             if doit_supprimer:
                 self.explosion.remove(e)
