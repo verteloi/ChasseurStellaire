@@ -172,7 +172,7 @@ class Asteroide:
         self.y += self.vy
 
 class Explosion:
-    def __init__(self ,x, y):
+    def __init__(self ,x, y,contact):
         self.x = x
         self.y = y
         self.taille_x = 10
@@ -180,13 +180,17 @@ class Explosion:
         self.tik = 2.5
         self.opacity = 1
         self.status = 1
+        self.contact = contact
+
+
 
     def mise_a_jour(self):
-        
-        if (self.taille_y <= 30 and self.status == 1):
+        tailleMmax = 30 if self.contact == 1 else 50
+        print(tailleMmax)
+        if (self.taille_y <= tailleMmax and self.status == 1):
             self.taille_x += self.tik
             self.taille_y += self.tik
-            if(self.taille_x >= 30):
+            if(self.taille_x >= tailleMmax):
                 self.status = 2
 
         if(self.status == 2):
@@ -286,7 +290,7 @@ class Modele:
             for m in list(self.mine):
                 if(a.x - a.taille_x <= m.x <= a.x + a.taille_x and a.y - a.taille_y <= m.y <= a.y + a.taille_y):
                     self.mine.remove(m)
-                    nouvelle_explosion = Explosion(m.x,m.y)
+                    nouvelle_explosion = Explosion(m.x,m.y,2)
                     self.explosion.append(nouvelle_explosion)
                     break
 
@@ -296,7 +300,7 @@ class Modele:
                 if(o.x - o.taille_x <= m.x <= o.x + o.taille_x and o.y - o.taille_y <= m.y <= o.y + o.taille_y):
                     self.mine.remove(m)
                     self.ovnis.remove(o)
-                    nouvelle_explosion = Explosion(m.x,m.y)
+                    nouvelle_explosion = Explosion(m.x,m.y,2)
                     self.explosion.append(nouvelle_explosion)
                     break
 
@@ -306,7 +310,7 @@ class Modele:
                 if m.x - m.taille_x <= p.x <= m.x + m.taille_x and m.y - m.taille_y <= p.y <= m.y + m.taille_y:
                     self.mine.remove(m)
                     self.vaisseau.projectiles.remove(p)
-                    nouvelle_explosion = Explosion(m.x,m.y)
+                    nouvelle_explosion = Explosion(m.x,m.y,2)
                     self.explosion.append(nouvelle_explosion)
                     break
 
@@ -315,7 +319,7 @@ class Modele:
             if (m.x - m.taille_x <= self.vaisseau.x <= m.x + m.taille_x and m.y - m.taille_y <= self.vaisseau.y <= m.y + m.taille_y):
                 self.vaisseau.vie -= 1
                 self.mine.remove(m)
-                nouvelle_explosion = Explosion(m.x,m.y)
+                nouvelle_explosion = Explosion(m.x,m.y,2)
                 self.explosion.append(nouvelle_explosion)
                 break
     
@@ -327,11 +331,14 @@ class Modele:
                     if (o.vie == 0):
                         self.supprimerOvni(o.id)
 
-    def collisionExplosionOvni(self):
+    def collisionExplosionMine(self):
         for e in list (self.explosion):
             for m in list(self.ovnis):
                 if(e.x - e.taille_x <= m.x <= e.x + e.taille_x and e.y - e.taille_y <= m.y <= e.y + e.taille_y):
                     self.mine.remove()
+    
+
+                
                 
     
     def mise_a_jour_explosions(self):
@@ -352,13 +359,14 @@ class Modele:
         self.collisionMineProjectile()
         self.collisionMineVaisseau()
         self.collsisionExplosionOvni()
+        self.collisionExplosionMine()
         self.mise_a_jour_explosions()
         
     def supprimerOvni(self, id):
         for o in self.ovnis:
             if o.id == id:
                 self.ovnis.remove(o)
-                nouvelle_explosion = Explosion(o.x,o.y)
+                nouvelle_explosion = Explosion(o.x,o.y,1)
                 self.explosion.append(nouvelle_explosion)
                 break
 

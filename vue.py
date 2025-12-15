@@ -164,6 +164,7 @@ class Vue:
                 fill="red", tags="jeu"
             )
 
+        # --- Mines
         for m in modele.mine:
             self.canevas.create_oval(
                 m.x - m.taille_x,
