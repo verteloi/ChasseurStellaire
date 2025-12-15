@@ -14,7 +14,7 @@ class Vue:
 
     # ---------- Création de l'interface ----------
     def creer_fenetre_principale(self):
-        self.frame_principale = tk.Frame(self.root)
+        self.frame_principale = tk.Frame(self.root, bg="black")
         self.frame_principale.pack()
 
     def creer_frame_canevas(self):
@@ -26,18 +26,23 @@ class Vue:
         self.canevas.bind("<Button-1>", self.tirer)
         self.canevas.bind("<ButtonRelease-1>", self.release)
 
+        # Bindings (la Vue gère le canevas)
+        self.canevas.bind("<Motion>", self.deplacer_vaisseau)
+        self.canevas.bind("<Button-1>", self.tirer)
+        self.canevas.bind("<ButtonRelease-1>", self.release)
+
     def creer_frame_infos(self):
-        self.frame_infos = tk.Frame(self.frame_principale, bg="#222")
-        self.frame_infos.grid(row=0, column=1, sticky="n")
+        self.frame_infos = tk.Frame(self.frame_principale, bg="black")
+        self.frame_infos.grid(row=1, column=0, sticky="n")
 
-        self.label_vie = tk.Label(self.frame_infos, text="Vies : 3", fg="white", bg="#222", font=("Arial", 12))
-        self.label_vie.pack(pady=10)
+        self.label_vie = tk.Label(self.frame_infos, text="Vies : 3", fg="white", bg="black" , font=("Arial", 12), padx=20)
+        self.label_vie.pack(side="left", pady=10)
 
-        self.label_niveau = tk.Label(self.frame_infos, text="Niveau : 1", fg="white", bg="#222", font=("Arial", 12))
-        self.label_niveau.pack(pady=10)
+        self.label_niveau = tk.Label(self.frame_infos, text="Niveau : 1", fg="white", font=("Arial", 12), bg="black", padx=20)
+        self.label_niveau.pack(side="left",pady=10)
 
-        self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", bg="#222", font=("Arial", 12))
-        self.label_score.pack(pady=10)
+        self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", font=("Arial", 12), bg="black", padx=20)
+        self.label_score.pack(side="left", pady=10)
 
     def clear_window(self):
         self.canevas.delete("all")
@@ -59,10 +64,20 @@ class Vue:
         
         self.root.after(self.delay, effacer_text)
 
+
     # ---------- Affichage du jeu ----------
     def afficher_jeu(self):
         modele = self.modele
         self.canevas.delete("jeu")
+
+        for e in modele.etoiles:
+            self.canevas.create_oval(
+                e.x - e.taille_x,
+                e.y - e.taille_y,
+                e.x + e.taille_x,
+                e.y + e.taille_y,
+                fill="lightgray", tags="jeu"
+            )
 
         # --- Vaisseau du joueur ---
         v = modele.vaisseau
@@ -126,7 +141,15 @@ class Vue:
                 fill="grey",
                 width=2, tags="jeu"
             )
-
+            for p in o.projectiles: ####
+                self.canevas.create_rectangle(####
+                    p.x - p.taille_x,####
+                    p.y - p.taille_y,###
+                    p.x + p.taille_x,###
+                    p.y,####
+                    fill="red" , tags="jeu"####
+                )
+                
         # --- Astéroïdes ---
         for a in modele.asteroides:
             self.canevas.create_oval(
@@ -216,6 +239,25 @@ class Vue:
         self.label_vie.config(text=f"Vies : {v.vie}")
         self.label_niveau.config(text=f"Niveau : {modele.niveau}")
         self.label_score.config(text=f"Score : {modele.score}")
+
+        # Mines
+        for m in modele.mine:
+            self.canevas.create_oval(
+                m.x - m.taille_x,
+                m.y - m.taille_y,
+                m.x + m.taille_x,
+                m.y + m.taille_y,
+                fill="#FF9912", tags="jeu"
+            )
+
+        for m in modele.mine:
+            self.canevas.create_oval(
+            m.x - (m.taille_x - 5),
+            m.y - (m.taille_y - 5),
+            m.x + (m.taille_x - 5),
+            m.y + (m.taille_y - 5),
+                fill="red", tags="jeu"
+            )
 
     def deplacer_vaisseau(self,evt):
         # on pourrait vouloir le déplacer en y aussi

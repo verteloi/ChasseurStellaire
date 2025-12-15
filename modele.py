@@ -8,6 +8,20 @@ def createur_identifiant():
     prochain_id += 1
     return "id_"+str(prochain_id)
 
+class Etoiles:
+    def __init__(self, x, y, vy, id):
+        self.x = x
+        self.y = y
+        self.vy = vy
+        self.size = 2
+        self.taille_x = self.size
+        self.taille_y = self.size
+        self.degat = 0
+        self.id = id
+
+    def mise_a_jour(self):
+        self.y += self.vy
+
 class Projectile:
     def __init__(self, x, y, vx = 0):
         self.x = x
@@ -20,6 +34,17 @@ class Projectile:
     def mise_a_jour(self):
         self.y += self.vitesse
         self.x += self.vx
+
+class ProjectileOvni: 
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.vitesse = 10  # vers le bas ####
+        self.taille_x = 2 
+        self.taille_y = 10 
+
+    def mise_a_jour(self):
+        self.y += self.vitesse
 
 class Powerup:
     def __init__(self, x, y, vitesse, id):
@@ -59,7 +84,7 @@ class Vaisseau:
     def __init__(self, x, y, modele):
         self.x = x
         self.y = y
-        self.vie = 3
+        self.vie = 1000
         self.projectiles = []
         self.taille_x = 15
         self.taille_y = 15
@@ -125,6 +150,7 @@ class OVNI:
         self.vie = vie
         self.degat = 1
         self.couleur_ovni()
+        self.projectiles = []
 
     def couleur_ovni(self):
         match self.vie :
@@ -141,7 +167,18 @@ class OVNI:
             case 6:
                 self.couleur = "blue"
 
+    def ovniTire(self):
+        nouveau_proj = ProjectileOvni(self.x, self.y + 20) 
+        self.projectiles.append(nouveau_proj)
+
     def mise_a_jour(self):
+        for p in self.projectiles: #####
+            p.mise_a_jour() #####
+
+        self.projectiles = [####
+            p for p in self.projectiles #####
+            if p.y > 0 ####
+        ]
         self.y += self.vy
         self.couleur_ovni()
 
@@ -211,7 +248,23 @@ class Boss:
             self.x = 600 - self.taille_x
             self.vx *= -1
 
+        if self.y <= 100:
+            self.y += 3
 
+
+# Classe Mine
+class MINE:
+    def __init__(self,x,y,vy,vie):
+        self.x = x
+        self.y = y
+        self.vy = vy
+        self.taille_x = 10
+        self.taille_y = 10
+        self.vie = vie
+        self.degat = 1
+
+    def mise_a_jour(self):
+        self.y += self.vy
 
 # ------------------ MODÈLE ------------------
 
@@ -230,11 +283,13 @@ class Modele:
         self.compteur = 0
         self.shooting = False
         self.explosion = []
+        self.etoiles = []
         self.stage = 1
         self.temps = 0
         self.laserCooldown = 0
         self.laserTimer = 0
         self.projectiles_boss = []
+        self.mine = []
 
     #Collision ovni/vaisseau
     def collisionOvniVaisseau(self):
@@ -354,6 +409,22 @@ class Modele:
                 if v.vie <= 0:
                     self.parent.gameOver()
 
+    def collisionProjectileBoss(self):
+        if self.boss == 0:
+            return
+        
+        b = self.boss
+        x1 = b.x - b.taille_x // 2 #Longueur de 600, donc 600/2
+        x2 = b.x + b.taille_x // 2
+        y1 = b.y + b.taille_y // 2 # Hauteur de 20
+        y2 = b.y - b.taille_y // 2
+
+        for p in list(self.vaisseau.projectiles):
+            if x1 <= p.x <= x2 and y2 <= p.y <= y1:
+                self.vaisseau.projectiles.remove(p)
+                self.boss.vie -= 1
+                break
+
     def collisionProjectileBossVaisseau(self):
         v = self.vaisseau
 
@@ -377,6 +448,78 @@ class Modele:
 
                 break
 
+    # COLLISIONS POUR LES MINES
+
+    def collisionMineOvnis(self):
+        for o in list(self.ovnis):
+            for m in list(self.mine):
+                if(o.x - o.taille_x <= m.x <= o.x + o.taille_x and o.y - o.taille_y <= m.y <= o.y + o.taille_y):
+                    if m:
+                        self.mine.remove(m)
+                    self.ovnis.remove(o)
+                    nouvelle_explosion = Explosion(m.x,m.y)
+                    self.explosion.append(nouvelle_explosion)
+                    break
+
+    def collisionMineProjectile(self):
+         for m in list(self.mine):
+            for p in list(self.vaisseau.projectiles):
+                if m.x - m.taille_x <= p.x <= m.x + m.taille_x and m.y - m.taille_y <= p.y <= m.y + m.taille_y:
+                    if m:
+                        self.mine.remove(m)
+                    self.vaisseau.projectiles.remove(p)
+                    nouvelle_explosion = Explosion(m.x,m.y)
+                    self.explosion.append(nouvelle_explosion)
+                    break
+
+    def collisionMineVaisseau(self):
+        for m in list(self.mine):
+            if (m.x - m.taille_x <= self.vaisseau.x <= m.x + m.taille_x and m.y - m.taille_y <= self.vaisseau.y <= m.y + m.taille_y):
+                self.vaisseau.vie -= 1
+                if m:
+                    self.mine.remove(m)
+                nouvelle_explosion = Explosion(m.x,m.y)
+                self.explosion.append(nouvelle_explosion)
+                break
+
+    def collsisionExplosionOvni(self):
+        for e in list(self.explosion):
+            for o in list(self.ovnis):
+                if(e.x - e.taille_x <= o.x <= e.x + e.taille_x and e.y - e.taille_y <= o.y <= e.y + e.taille_y):
+                    o.vie -= 1
+                    if (o.vie == 0):
+                        self.supprimerOvni(o.id)
+
+    def collisionExplosionMine(self):
+        for e in list (self.explosion):
+            for m in list(self.ovnis):
+                if(e.x - e.taille_x <= m.x <= e.x + e.taille_x and e.y - e.taille_y <= m.y <= e.y + e.taille_y):
+                    if m:
+                        self.mine.remove()
+
+    def collisionMineAsteroide(self):
+        for a in list(self.asteroides):
+            for m in list(self.mine):
+                if(a.x - a.taille_x <= m.x <= a.x + a.taille_x and a.y - a.taille_y <= m.y <= a.y + a.taille_y):
+                    if m:
+                        self.mine.remove(m)
+                    nouvelle_explosion = Explosion(m.x,m.y)
+                    self.explosion.append(nouvelle_explosion)
+                    break
+
+    #Collision tireOvni/vaisseau:
+    def collisionProjectileOvni(self):
+        for o in list(self.ovnis):
+            for p in list(o.projectiles):
+                if self.vaisseau.x - self.vaisseau.taille_x <= p.x <= self.vaisseau.x + self.vaisseau.taille_x and self.vaisseau.y - self.vaisseau.taille_y <= p.y <= self.vaisseau.y + self.vaisseau.taille_y:
+                    o.projectiles.remove(p)
+                    if (self.vaisseau.shield == True):
+                        self.vaisseau.shield = False
+                    else:
+                        self.vaisseau.vie -= 1
+                    if (self.vaisseau.vie == 0):
+                        self.parent.gameOver()
+                    break
     def mise_a_jour_explosions(self):
         for e in list(self.explosion):
             doit_supprimer = e.mise_a_jour()
@@ -419,9 +562,17 @@ class Modele:
         self.collisionProjectile()
         self.collisionPowerupVaisseau()
         self.collisionProjectileAstroide()
-        if (self.temps % 200) < 40:
+        if (self.temps % 350) < 40:
             self.collisionLaserBossVaisseau()
         self.collisionProjectileBossVaisseau()
+        self.collisionProjectileBoss()
+        self.collisionMineAsteroide()
+        self.collisionMineOvnis()
+        self.collisionMineProjectile()
+        self.collisionMineVaisseau()
+        self.collsisionExplosionOvni()
+        self.collisionExplosionMine()
+        self.collisionProjectileOvni()
         self.mise_a_jour_explosions()
         self.mise_a_jour_boss()
         
@@ -469,16 +620,17 @@ class Modele:
 
 
         # Apparition aléatoire des ennemis
-        alea_ovni = random.random()
-        if alea_ovni < 0.04 * self.stage:
-            nouvel_ovni = OVNI(
-                random.randint(0, self.largeur),
-                0,
-                random.randint(2, 5),
-                createur_identifiant(),
-                min(self.stage, 3)
-            )
-            self.ovnis.append(nouvel_ovni)
+        if self.stage < 6:
+            alea_ovni = random.random()
+            if alea_ovni < 0.04 * self.stage:
+                nouvel_ovni = OVNI(
+                    random.randint(0, self.largeur),
+                    0,
+                    random.randint(2, 5),
+                    createur_identifiant(),
+                    min(self.stage, 3)
+                )
+                self.ovnis.append(nouvel_ovni)
 
         alea_asteroide = random.random()
         if alea_asteroide < 0.015 * self.stage:
@@ -490,6 +642,34 @@ class Modele:
             )
             self.asteroides.append(nouvel_ast)
 
+        alea_mine = random.random()
+        if alea_mine < 0.010 * self.stage:
+            nouvel_mine = MINE(
+                random.randint(0, self.largeur),
+                0,
+                random.randint(3,6),
+                createur_identifiant()
+            )
+            self.mine.append(nouvel_mine)
+        for m in self.mine:
+            m.mise_a_jour()
+            print(m.y)
+
+        for o in self.ovnis: #######
+            if random.randint(1, 120) == 1: #######
+                o.ovniTire() ########
+
+
+        alea_etoiles = random.random()
+        if alea_etoiles < 0.20:
+            nouvel_etoile = Etoiles(
+            random.randint(0, self.largeur),
+                0,
+                random.randint(3, 6),
+                createur_identifiant()
+            )
+            self.etoiles.append(nouvel_etoile)
+
         # Déplacement des ennemis
         for o in self.ovnis:
             o.mise_a_jour()
@@ -500,6 +680,8 @@ class Modele:
         for p in self.powerups:
             p.mise_a_jour()
 
+        for e in self.etoiles:
+            e.mise_a_jour()
         # Nettoyage des objets sortis de l'écran
         self.ovnis = [
             o for o in self.ovnis
@@ -511,11 +693,19 @@ class Modele:
             if a.y < self.hauteur
         ]
 
+        self.etoiles = [
+            e for e in self.etoiles
+            if e.y < self.hauteur
+        ]
+
         self.powerups = [
             p for p in self.powerups
             if p.y < self.hauteur
         ]
-
+        self.mine = [
+            m for m in self.mine
+            if m.y < self.hauteur
+        ]
 
         # counters and time
         self.compteur += 1
@@ -539,6 +729,11 @@ class Modele:
             if p.y < self.hauteur:  # if still on screen
                 new_list.append(p)
 
+        # Delete boss if killed
+        if self.boss:
+            if self.boss.vie <= 0:
+                del self.boss
+
         self.projectiles_boss = new_list   # replace old list with cleaned one
 
 
@@ -561,7 +756,7 @@ class Modele:
                 self.stage = 2
                 boss_spawned = False
                 if not boss_spawned:
-                    self.boss = Boss(300, 100, 10, "grey")
+                    self.boss = Boss(300, -100, 10, "grey")
                     boss_spawned = True
             case 700:
                 self.stage = 3
