@@ -1,248 +1,109 @@
+# -*- coding: ISO-8859-1 -*-
+from tkinter import *
 import tkinter as tk
 
-class Vue:
-    def __init__(self, controleur, modele):
-        self.controleur = controleur
-        self.modele = modele
+#liste de frames pour toutes les affaires que je veux dessiner
+#frames = petites boites
+#fonctionb pour créer chq frame (comme des inits)
+#dictionnaire avedc les fenetres avec les tags
+
+class Vue():
+    def __init__(self, parent):
+        self.parent = parent
         self.root = tk.Tk()
-        self.root.title("Vertical Shooter - MVC")
+        self.height = 700
+        self.width = 700
+        self.img_parcour1 = PhotoImage(file="images\\img_parcour1.png")
+        self.img_parcour2 = PhotoImage(file="images\\img_parcour2.png")
+        self.img_parcour3 = PhotoImage(file="images\\img_parcour3.png")
+        self.img_creep_ours = PhotoImage(file="images\\ours.png")
+        self.img_creep_por = PhotoImage(file="images\\porcupine.png")
+        self.img_creep_raton = PhotoImage(file="images\\raton.png")
+        self.img_creep_renard = PhotoImage(file="images\\renard.png")
+        self.img_creep_ecur = PhotoImage(file="images\\squirrel.png")
+        self.img_menu = tk.PhotoImage(file="images\\bg.png")
+        self.img_title = tk.PhotoImage(file="images\\title.png")
+        self.menu_frame = tk.Frame(self.root, width=self.width, height=self.height)
+        self.menu_frame.pack(fill="both", expand=True)
+        self.menu_frame.pack_propagate(False)
 
-        self.creer_fenetre_principale()
-        self.creer_frame_canevas()
-        self.creer_frame_infos()
+        self.afficherMenu()
+
+    def afficherMenu(self):
+        self.canvas_menu = tk.Canvas(self.menu_frame, width=self.width, height=self.height, highlightthickness=0)
+        self.canvas_menu.pack(fill="both", expand=True)
+
+        # Background
+        self.canvas_menu.create_image(0, 0, image=self.img_menu, anchor="nw")
+
+        # Titre
+        self.canvas_menu.create_image(self.width//2, 120, image=self.img_title, anchor="center")
+
+        # boutons
+        btn_jouer = tk.Button(self.menu_frame, text="JOUER", font=("Arial", 20), command=self.creerPartie)
+        btn_scores = tk.Button(self.menu_frame, text="SCORES", font=("Arial", 20))
+
+        self.canvas_menu.create_window(self.width//2, 300, window=btn_jouer)
+        self.canvas_menu.create_window(self.width//2, 380, window=btn_scores)
+
+    def creerPartie(self):
+        self.menu_frame.pack_forget()
+        self.sidebar = tk.Frame(self.root, bg="white", width=250, height=self.height)
+        self.sidebar.pack(side="right") 
+        self.canevas = tk.Canvas(self.root, width=self.width, height=self.height) 
+        self.canevas.pack()
+
+        b = tk.Button(self.root, text="Demarrer", command=self.parent.demarrePartie)
+        b.pack()
+
+        match self.parent.modele.parcourChoisi:
+            case 0:
+                self.canevas.create_image(0,0, image=self.img_parcour1, anchor="nw")
+                #image=self.img_parcour1
+            case 1:
+                self.canevas.create_image(0,0, image=self.img_parcour3, anchor="nw")
+                #image=self.img_parcour2
+            case 2:
+                self.canevas.create_image(0,0, image=self.img_parcour2, anchor="nw")
+                #image=self.img_parcour3
+
+    def getPosTour(self, evt):
+        x = evt.x / 5
+        y = evt.y / 5
+        # print ("POS",x,y)
+        self.parent.setTour([x, y])
+
+    def afficheModele(self):
+        pos = []
+        # On assume que nivoActif est initialis� au moment de l'affichage
+        for i in self.parent.modele.partieCourante.parcourChoisi.noeuds:
+            pos.append(i[0] * (self.width/100))
+            pos.append(i[1] * (self.height/100))
 
 
-    # ---------- Création de l'interface ----------
-    def creer_fenetre_principale(self):
-        self.frame_principale = tk.Frame(self.root)
-        self.frame_principale.pack()
-
-    def creer_frame_canevas(self):
-        self.canevas = tk.Canvas(self.frame_principale, width=600, height=700, bg="black")
-        self.canevas.grid(row=0, column=0)
-
-        # Bindings (la Vue gère le canevas)
-        self.canevas.bind("<Motion>", self.deplacer_vaisseau)
-        self.canevas.bind("<Button-1>", self.tirer)
-        self.canevas.bind("<ButtonRelease-1>", self.release)
-
-    def creer_frame_infos(self):
-        self.frame_infos = tk.Frame(self.frame_principale, bg="#222")
-        self.frame_infos.grid(row=0, column=1, sticky="n")
-
-        self.label_vie = tk.Label(self.frame_infos, text="Vies : 3", fg="white", bg="#222", font=("Arial", 12))
-        self.label_vie.pack(pady=10)
-
-        self.label_niveau = tk.Label(self.frame_infos, text="Niveau : 1", fg="white", bg="#222", font=("Arial", 12))
-        self.label_niveau.pack(pady=10)
-
-        self.label_score = tk.Label(self.frame_infos, text="Score : 0", fg="white", bg="#222", font=("Arial", 12))
-        self.label_score.pack(pady=10)
-
-    def clear_window(self):
-        self.canevas.delete("all")
-        self.canevas.config(bg="black")
-
-        self.canevas.create_text(300, 250, text="GAME OVER", font=("Arial", 40, "bold"), fill="red")
-        self.canevas.create_text(300, 320, text=f"Score finale : {self.modele.score} ovnis détruits", font=("Arial", 20), fill="white")
-        self.btn_rejouer = tk.Button(self.root, text="Réessayer?", font=("Arial", 16), command=self.controleur.rejouer)
-        self.canevas.create_window(300, 400, window=self.btn_rejouer)
-        self.btn_enregistrerScore = tk.Button(self.root, text="Enregistrer Score", font=("Arial", 16), command=self.controleur.enregistrerScore)
-        self.canevas.create_window(300, 450, window=self.btn_enregistrerScore)
-
-    def affichageStage(self, stage):
-        self.delay = 2500
-        self.texteStage = self.canevas.create_text(300, 250, text=f"STAGE {stage}", font=("Arial", 40, "bold"), fill="yellow")
-
-        def effacer_text():
-            self.canevas.delete(self.texteStage)
+        self.canevas.create_text(625, 10, fill="#FCA510", text=self.parent.modele.partieCourante.cash, font=("Cooper Black", 24), anchor="nw")
         
-        self.root.after(self.delay, effacer_text)
+        self.canevas.create_line(pos, width=30, fill="black", tags=("chemin",))  # ------ on n'a pas besoin de la ligne noire
 
-    # ---------- Affichage du jeu ----------
-    def afficher_jeu(self):
-        modele = self.modele
-        self.canevas.delete("jeu")
+    def afficheCreepTourBombe(self):
+        self.canevas.delete("creep")
+        self.canevas.delete("tour")
+        self.canevas.delete("bombe")
 
-        # --- Vaisseau du joueur ---
-        v = modele.vaisseau
-        self.canevas.create_rectangle(
-            v.x - v.taille_x,
-            v.y - 5,
-            v.x + v.taille_x,
-            v.y + 5,
-            fill="grey", tags="jeu"
-        )
-        self.canevas.create_oval(
-            v.x - (v.taille_x // 2),
-            v.y - v.taille_y,
-            v.x + (v.taille_x // 2),
-            v.y - 5,
-            fill="lightblue", tags="jeu"
-        )
-        self.canevas.create_line(
-            v.x,
-            v.y - v.taille_y,
-            v.x,
-            v.y - v.taille_y - 5,
-            fill="grey",
-            width=2, tags="jeu"
-        )
+        # Logique originale pr�serv�e (via nivoActif)
+        for i in self.parent.modele.partieCourante.nivoActif.creepsEnCours:
+            x1 = i.pos[0] * (self.width/100) - 15
+            y1 = i.pos[1] * (self.height/100) - 15
+            x2 = i.pos[0] * (self.width/100) + 15
+            y2 = i.pos[1] * (self.height/100) + 15
+            #self.canevas.create_oval(x1, y1, x2, y2, width=2, fill="red", tags=("creep",))
+            self.canevas.create_image(x1, y1, image=self.img_creep_ours, anchor="nw",tags=("creep",))
 
-        if (v.shield == True):
-            self.canevas.create_line(
-                v.x - 10,             
-                v.y - v.taille_y - 10,    
-                v.x + 10,             
-                v.y - v.taille_y - 10,    
-                fill="deepskyblue",
-                width=4, tags="jeu"
-        )
-
-        # --- Projectiles ---
-        for p in v.projectiles:
-            self.canevas.create_rectangle(
-                p.x - p.taille_x,
-                p.y - p.taille_y,
-                p.x + p.taille_x,
-                p.y,
-                fill="yellow", tags="jeu"
-            )
-
-        # --- OVNIs ---
-        for o in modele.ovnis:
-            self.canevas.create_rectangle(
-                o.x - o.taille_x,
-                o.y - o.taille_y,
-                o.x + o.taille_x,
-                o.y + o.taille_y,
-                fill=o.couleur, tags="jeu"
-            )
-            self.canevas.create_line(
-                o.x,
-                o.y + o.taille_y,
-                o.x,
-                o.y + o.taille_y + 6,
-                fill="grey",
-                width=2, tags="jeu"
-            )
-
-        # --- Astéroïdes ---
-        for a in modele.asteroides:
-            self.canevas.create_oval(
-                a.x - a.taille_x,
-                a.y - a.taille_y,
-                a.x + a.taille_x,
-                a.y + a.taille_y,
-                fill="gray", tags="jeu"
-            )
-        
-        # --- boss ---
-        b = modele.boss
-        if (b != 0):
-            self.canevas.create_oval(
-                b.x - b.taille_x // 4,
-                b.y - b.taille_y * 0.5 + 50,
-                b.x + b.taille_x // 4,
-                b.y + 60,
-                fill="purple", tags="jeu"
-            )
-
-            self.canevas.create_oval(
-                b.x - b.taille_x,
-                b.y - b.taille_y,
-                b.x + b.taille_x,
-                b.y + b.taille_y,
-                fill=b.couleur, tags="jeu"
-            )
-
-            self.canevas.create_oval(
-                b.x - b.taille_x // 2,
-                b.y - b.taille_y * 1.2,
-                b.x + b.taille_x // 2,
-                b.y,
-                fill="lightblue", tags="jeu"
-            )
-
-            self.canevas.create_oval(
-                b.x - b.taille_x // 7,
-                b.y - b.taille_y * 0.5,
-                b.x + b.taille_x // 7,
-                b.y,
-                fill="white", tags="jeu"
-            )
-
-            # --- boss lazer ---
-            if self.modele.temps > 450:
-                self.create_boss_laser(self.canevas, b, couleur= "purple")
-
-        # --- Powerups ---
-        for p in modele.powerups:
-            self.canevas.create_oval(
-                p.x - p.taille_x,
-                p.y - p.taille_y,
-                p.x + p.taille_x,
-                p.y + p.taille_y,
-                fill=p.color, tags="jeu"
-            )
-
-            # self.canevas.create_text(
-            #     p.x, p.y + 10,                # Coordinates of the text's anchor point
-            #         text="+1",    # The string to display
-            #         fill="white",        # Text color
-            #         font=("Arial", 20),  # Font settings
-            # )
-
-        # --- Explosion --
-        for e in modele.explosion:
-            self.canevas.create_oval(
-                e.x - e.taille_x,
-                e.y - e.taille_y,
-                e.x + e.taille_x,
-                e.y + e.taille_y,
-                fill="red", tags="jeu"
-            )
-
-        # --- Infos ---
-        self.label_vie.config(text=f"Vies : {v.vie}")
-        self.label_niveau.config(text=f"Niveau : {modele.niveau}")
-        self.label_score.config(text=f"Score : {modele.score}")
-
-    def deplacer_vaisseau(self,evt):
-        # on pourrait vouloir le déplacer en y aussi
-        self.controleur.deplacer_vaisseau(evt.x)
-
-    def tirer(self,evt):
-        self.controleur.tirer()
-
-    def rejouer(self):
-        self.controleur.rejouer()
-
-    def release(self, evt):
-        self.controleur.release()
-
-
-
-    def create_boss_laser(self, canvas, b, largeur=20, longueur=600, couleur="purple"):
-        # centré sous le boss
-        x1 = b.x - largeur // 2
-        y1 = b.y + b.taille_y
-        x2 = b.x + largeur // 2
-        y2 = y1 + longueur
-
-        r = largeur // 2
-
-        canvas.create_rectangle(
-            x1, y1, x2, y2,
-            fill=couleur, outline="", tags="jeu"   
-        )
-
-        canvas.create_oval(
-            x1 - r, y1, x1 + r, y2,
-            fill=couleur, outline="", tags="jeu"   
-        )
-
-        canvas.create_oval(
-            x2 - r, y1, x2 + r, y2,
-            fill=couleur, outline="", tags="jeu"   
-        )
+        # Logique originale pr�serv�e (via nivoActif)
+        for i in self.parent.modele.partieCourante.toursEnJeu.values():
+            x1 = i.pos[0] * 5 - 10
+            y1 = i.pos[1] * 5 - 10
+            x2 = i.pos[0] * 5 + 10
+            y2 = i.pos[1] * 5 + 10
+            # print("LOCtour",i.pos,x1,y1,x2,y2)
+            self.canevas.create_rectangle(x1, y1, x2, y2, width=1, fill="green", tags=("tour",))
